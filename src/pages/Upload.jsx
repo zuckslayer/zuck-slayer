@@ -1,4 +1,3 @@
-import { auth } from "../firebase";
 import { useState } from "react";
 import axios from "axios";
 import { auth, db } from "../firebase";
@@ -22,7 +21,7 @@ function Upload() {
 
     try {
       const res = await axios.post(
-        "https://api.cloudinary.com/v1_1/your_cloud_name/auto/upload",
+        "https://api.cloudinary.com/v1_1/danfrfbcn/auto/upload",
         formData,
         {
           onUploadProgress: (progressEvent) => {
@@ -37,11 +36,13 @@ function Upload() {
       alert("Upload successful!");
 
       await addDoc(collection(db, "posts"), {
-        caption,
+        caption: caption,
         url: imageUrl,
         userId: auth.currentUser.uid,
         createdAt: serverTimestamp(),
       });
+
+      alert("Upload successful!");
     } catch (error) {
       console.error("Upload failed", error);
       alert("Upload failed");

@@ -6,6 +6,8 @@ import Profile from "./pages/Profile";
 import Login from "./pages/login";
 import Signup from "./pages/signup";
 import PrivateRoute from "./components/PrivateRoute";
+import Feed from "./pages/Feed";
+import Legal from "./pages/Legal"; // 🆕 import for legal page
 
 function App() {
   return (
@@ -31,6 +33,8 @@ function App() {
         />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+        <Route path="/feed" element={<Feed />} />
+        <Route path="/legal" element={<Legal />} /> {/* 🆕 Legal Route */}
       </Routes>
     </div>
   );

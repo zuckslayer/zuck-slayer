@@ -6,7 +6,7 @@ const firebaseConfig = {
   apiKey: "AIzaSyCyTvV3fSBkMRBw4L_kDq8Y--bf_lN3L2o",
   authDomain: "zuckslayer-4df1c.firebaseapp.com",
   projectId: "zuckslayer-4df1c",
-  storageBucket: "zuckslayer-4df1c.firebasestorage.app",
+  storageBucket: "zuckslayer-4df1c.firebasestorage.appspot.com",
   messagingSenderId: "518889334248",
   appId: "1:518889334248:web:d0cd8aa21d2fdc8ac7f05dID"
 };

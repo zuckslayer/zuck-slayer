@@ -23,7 +23,8 @@ function Navbar() {
         Zuck Slayer
       </Link>
 
-      <div className="space-x-4 text-white">
+      <div className="space-x-4 text-white flex items-center">
+        <Link to="/feed">Feed</Link>
         <Link to="/">Home</Link>
         {user && <Link to="/upload">Upload</Link>}
         {user && <Link to="/profile">Profile</Link>}
@@ -34,9 +35,15 @@ function Navbar() {
             <Link to="/signup">Signup</Link>
           </>
         ) : (
-          <button onClick={handleLogout} className="text-red-400 hover:underline">
-            Logout
-          </button>
+          <>
+            <span className="text-sm text-gray-300">Hi, {user.email}</span>
+            <button
+              onClick={handleLogout}
+              className="ml-2 text-red-400 hover:underline"
+            >
+              Logout
+            </button>
+          </>
         )}
       </div>
     </nav>
@@ -44,3 +51,4 @@ function Navbar() {
 }
 
 export default Navbar;
+
