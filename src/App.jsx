@@ -5,16 +5,16 @@ import Layout from "./components/Layout";
 import Home from "./pages/Home";
 import Upload from "./pages/Upload";
 import Profile from "./pages/Profile";
+import EditProfile from "./pages/EditProfile";
+import Settings from "./pages/Settings";
 import Login from "./pages/login";
 import Signup from "./pages/signup";
 import PrivateRoute from "./components/PrivateRoute";
 import Feed from "./pages/Feed";
 import Legal from "./pages/Legal";
-import ForgotPassword from "./pages/ForgotPassword"; // 🔥 Import new page
+import ForgotPassword from "./pages/ForgotPassword";
 import IntroLoader from "./components/IntroLoader";
-import EditProfile from "./pages/EditProfile";
-import Settings from "./pages/Settings";
-
+import Chats from "./pages/Chats";
 
 function App() {
   const [showIntro, setShowIntro] = useState(true);
@@ -29,7 +29,7 @@ function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} /> {/* 🔥 New Route */}
+        <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/legal" element={<Legal />} />
 
         <Route element={<Layout />}>
@@ -39,14 +39,15 @@ function App() {
           <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
           <Route path="/edit-profile" element={<PrivateRoute><EditProfile /></PrivateRoute>} />
           <Route path="/settings" element={<PrivateRoute><Settings /></PrivateRoute>} />
+          <Route path="/chats" element={<PrivateRoute><Chats /></PrivateRoute>} />
         </Route>
       </Routes>
 
       <AnimatePresence>
         {showIntro && (
-          <IntroLoader 
+          <IntroLoader
             key="intro-loader"
-            onComplete={() => setShowIntro(false)} 
+            onComplete={() => setShowIntro(false)}
           />
         )}
       </AnimatePresence>

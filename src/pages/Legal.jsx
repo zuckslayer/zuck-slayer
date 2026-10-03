@@ -26,8 +26,9 @@ function Legal() {
         <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-3 group">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-pink-500 to-blue-600 flex items-center justify-center shadow-[0_0_15px_-3px_rgba(236,72,153,0.5)] group-hover:shadow-[0_0_25px_-3px_rgba(236,72,153,0.8)] transition-all">
-              <svg viewBox="0 0 24 24" fill="none" className="w-4 h-4 text-white" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z" />
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" className="w-6 h-6 text-white">
+              <path d="M7 20L14 4" />
+              <path d="M13 20L20 4" />
               </svg>
             </div>
             <span className="text-sm font-bold text-white tracking-tight hidden sm:block">

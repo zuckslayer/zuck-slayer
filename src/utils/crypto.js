@@ -103,3 +103,18 @@ export const generateEncryptionKey = async () => {
   const exported = await window.crypto.subtle.exportKey("raw", key);
   return bufferToBase64(exported);
 };
+
+/**
+ * Derives a deterministic AES key for a conversation between two users.
+ * Both users compute the same key without ever sharing it.
+ * @param {string} uid1
+ * @param {string} uid2
+ * @returns {Promise<string>} Base64 encoded key
+ */
+export const deriveConversationKey = async (uid1, uid2) => {
+  const sorted = [uid1, uid2].sort().join("|");
+  const data = new TextEncoder().encode(`zuck-slayer-chat-v1-${sorted}`);
+  const hashBuffer = await window.crypto.subtle.digest("SHA-256", data);
+  const hashArray = new Uint8Array(hashBuffer);
+  return btoa(String.fromCharCode(...hashArray));
+};

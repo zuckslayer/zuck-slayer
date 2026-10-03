@@ -32,11 +32,11 @@ function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] flex flex-col lg:flex-row overflow-hidden">
+    <div className="min-h-[100dvh] bg-[#0a0a0a] flex flex-col lg:flex-row relative">
       
       {/* Grid Background */}
       <div
-        className="absolute inset-0 opacity-[0.03] pointer-events-none"
+        className="fixed inset-0 opacity-[0.03] pointer-events-none"
         style={{
           backgroundImage:
             "linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)",
@@ -45,13 +45,11 @@ function Login() {
       />
 
       {/* Glow Orbs */}
-      <div className="absolute top-[-200px] left-[-200px] w-[500px] h-[500px] rounded-full bg-pink-600/25 blur-[130px] pointer-events-none" />
-      <div className="absolute bottom-[-200px] right-[-200px] w-[500px] h-[500px] rounded-full bg-blue-600/25 blur-[130px] pointer-events-none" />
+      <div className="fixed top-[-200px] left-[-200px] w-[400px] h-[400px] md:w-[500px] md:h-[500px] rounded-full bg-pink-600/25 blur-[130px] pointer-events-none" />
+      <div className="fixed bottom-[-200px] right-[-200px] w-[400px] h-[400px] md:w-[500px] md:h-[500px] rounded-full bg-blue-600/25 blur-[130px] pointer-events-none" />
 
-      {/* 🔥 LEFT SIDE: Branding */}
+      {/* LEFT SIDE: Branding (desktop only) */}
       <div className="hidden lg:flex lg:w-1/2 relative z-10 flex-col justify-between p-14 border-r border-white/5">
-
-        {/* Logo */}
         <Link to="/" className="flex items-center gap-4 w-fit group">
           <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-pink-500 via-purple-500 to-blue-600 flex items-center justify-center shadow-[0_0_30px_-5px_rgba(236,72,153,0.6)] group-hover:shadow-[0_0_45px_-5px_rgba(236,72,153,0.9)] group-hover:scale-105 transition-all duration-300">
             <svg viewBox="0 0 24 24" fill="none" className="w-8 h-8 text-white" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -81,8 +79,6 @@ function Login() {
           <p className="text-gray-400 text-lg max-w-md leading-relaxed">
             Your feed hasn't moved an inch. No algorithm decided what you missed. Just the people you actually care about.
           </p>
-
-          {/* Typographic Feature List (No Emojis) */}
           <div className="space-y-5 mt-12">
             {[
               "A feed that respects your time",
@@ -103,16 +99,12 @@ function Login() {
         </div>
       </div>
 
-      {/* 🔥 RIGHT SIDE: Login Form */}
-      <div className="flex-1 flex items-center justify-center p-6 lg:p-12 relative z-10">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-          className="w-full max-w-md"
-        >
+      {/* RIGHT SIDE: Login Form — this is the fix */}
+      <div className="flex-1 relative z-10 flex flex-col justify-center px-4 py-8 sm:px-6 lg:px-12 min-h-[100dvh]">
+        <div className="w-full max-w-md mx-auto">
+          
           {/* Mobile Logo */}
-          <Link to="/" className="lg:hidden flex items-center justify-center gap-3 mb-8">
+          <Link to="/" className="lg:hidden flex items-center justify-center gap-3 mb-6">
             <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-pink-500 via-purple-500 to-blue-600 flex items-center justify-center shadow-[0_0_25px_-5px_rgba(236,72,153,0.6)]">
               <svg viewBox="0 0 24 24" fill="none" className="w-7 h-7 text-white" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z" />
@@ -124,16 +116,21 @@ function Login() {
           </Link>
 
           {/* Card */}
-          <div className="relative bg-[#111111]/80 backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-2xl overflow-hidden">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+            className="relative bg-[#111111]/80 backdrop-blur-xl border border-white/10 rounded-3xl p-6 sm:p-8 shadow-2xl overflow-hidden"
+          >
             <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-pink-500/10 via-transparent to-blue-500/10 pointer-events-none" />
-            
+
             <div className="relative z-10">
-              <div className="mb-8">
-                <h2 className="text-3xl font-bold text-white tracking-tight mb-2">Welcome back</h2>
+              <div className="mb-6 sm:mb-8">
+                <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-tight mb-2">Welcome back</h2>
                 <p className="text-sm text-gray-500">Your feed is waiting for you.</p>
               </div>
 
-              <form onSubmit={handleLogin} className="space-y-5">
+              <form onSubmit={handleLogin} className="space-y-4 sm:space-y-5">
                 {/* Email */}
                 <div>
                   <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">
@@ -199,7 +196,6 @@ function Login() {
                   </div>
                 </div>
 
-                {/* Error */}
                 {error && (
                   <motion.div
                     initial={{ opacity: 0, y: -10 }}
@@ -232,7 +228,7 @@ function Login() {
                 </button>
               </form>
 
-              <div className="flex items-center gap-4 my-6">
+              <div className="flex items-center gap-4 my-5">
                 <div className="flex-1 h-px bg-white/10"></div>
                 <span className="text-[10px] text-gray-600 font-mono tracking-widest">OR</span>
                 <div className="flex-1 h-px bg-white/10"></div>
@@ -245,16 +241,16 @@ function Login() {
                 New around here? Join the chaos
               </Link>
             </div>
-          </div>
+          </motion.div>
 
-          <p className="text-center text-xs text-gray-600 mt-6 font-mono">
+          <p className="text-center text-xs text-gray-600 mt-5 font-mono">
             By continuing, you accept our{" "}
             <Link to="/legal" className="text-pink-400 hover:text-pink-300 underline underline-offset-2">
               Terms & Privacy Policy
             </Link>
             . We keep them short. Unlike Zuck's.
           </p>
-        </motion.div>
+        </div>
       </div>
     </div>
   );

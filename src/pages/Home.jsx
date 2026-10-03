@@ -21,7 +21,7 @@ function Home() {
     <div className="w-full space-y-16">
       
       {/* 🔥 Hero Section */}
-      <section className="relative rounded-3xl overflow-hidden min-h-[70vh] flex items-center justify-center border border-white/10 shadow-2xl">
+      <section className="relative rounded-2xl md:rounded-3xl overflow-hidden min-h-[60vh] md:min-h-[70vh] flex items-center justify-center border border-white/10 shadow-2xl">
         {/* 🔥 REPLACED 404 IMAGE WITH CYBERPUNK GRADIENT */}
         <div 
           className="absolute inset-0"
@@ -38,7 +38,7 @@ function Home() {
             initial={{ opacity: 0, y: 40, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ duration: 0.8, type: "spring", bounce: 0.4 }}
-            className="text-6xl md:text-8xl font-black mb-6 text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-pink-500 drop-shadow-[0_0_15px_rgba(236,72,153,0.5)] tracking-tighter"
+            className="text-4xl sm:text-6xl md:text-8xl font-black mb-6 text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-pink-500 drop-shadow-[0_0_15px_rgba(236,72,153,0.5)] tracking-tighter"
           >
             ZUCK SLAYER
           </motion.h1>

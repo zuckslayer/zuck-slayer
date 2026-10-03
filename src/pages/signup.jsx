@@ -87,8 +87,9 @@ function Signup() {
         {/* Big Clean Logo */}
         <Link to="/" className="flex items-center gap-4 w-fit group">
           <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-pink-500 via-purple-500 to-blue-600 flex items-center justify-center shadow-[0_0_30px_-5px_rgba(236,72,153,0.6)] group-hover:shadow-[0_0_45px_-5px_rgba(236,72,153,0.9)] group-hover:scale-105 transition-all duration-300">
-            <svg viewBox="0 0 24 24" fill="none" className="w-8 h-8 text-white" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z" />
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" className="w-6 h-6 text-white">
+            <path d="M7 20L14 4" />
+            <path d="M13 20L20 4" />
             </svg>
           </div>
           <div>

@@ -67,8 +67,7 @@ function IntroLoader({ onComplete }) {
       >
         <div className="relative">
           {/* 🔥 Vice City Pink (FF007F) → Violet (8A2BE2) → Facebook Blue (1877F2) */}
-          <h1 
-            className="text-6xl md:text-8xl font-black tracking-tighter drop-shadow-[0_0_30px_rgba(255,0,127,0.6)]"
+          <h1 className="text-4xl sm:text-6xl md:text-8xl font-black tracking-tighter drop-shadow-[0_0_30px_rgba(255,0,127,0.6)]"
             style={{
               background: "linear-gradient(90deg, #FF007F 0%, #8A2BE2 50%, #1877F2 100%)",
               WebkitBackgroundClip: "text",
@@ -91,7 +90,7 @@ function IntroLoader({ onComplete }) {
           </AnimatePresence>
         </div>
 
-        <p className="text-[#FF007F] font-mono text-sm mt-4 tracking-[0.3em] uppercase transition-colors duration-300">
+        <p className="text-[#FF007F] font-mono text-[10px] sm:text-sm mt-4 tracking-[0.2em] sm:tracking-[0.3em] uppercase text-center px-4 transition-colors duration-300">
           {isCut ? "ACCESS GRANTED" : "Establishing Secure Connection"}
         </p>
       </motion.div>
@@ -99,7 +98,7 @@ function IntroLoader({ onComplete }) {
       <AnimatePresence>
         {stage === 0 && (
           <motion.div className="relative z-10 flex flex-col items-center" exit={{ opacity: 0, transition: { duration: 0.3 } }}>
-            <div className="w-64 md:w-96 h-1 bg-white/10 rounded-full mt-12 overflow-hidden">
+            <div className="w-56 sm:w-64 md:w-96 h-1 bg-white/10 rounded-full mt-12 overflow-hidden">
               <motion.div className="h-full" style={{ background: "linear-gradient(90deg, #FF007F, #1877F2)", boxShadow: "0 0 15px rgba(255,0,127,0.8)" }}
                 initial={{ width: "0%" }} animate={{ width: `${progress}%` }} transition={{ ease: "easeOut", duration: 0.2 }} />
             </div>

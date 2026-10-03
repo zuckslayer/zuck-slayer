@@ -3,3 +3,23 @@
 @tailwind utilities;
 
 /* custom styles if needed */
+
+/* ═══ Global Dark Background ═══ */
+html, body, #root {
+  background-color: #0a0a0a;
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
+  color-scheme: dark;
+}
+
+/* ═══ iOS Safari dynamic viewport fix ═══ */
+body {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+/* ═══ Better scrolling on iOS ═══ */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
