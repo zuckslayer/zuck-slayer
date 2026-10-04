@@ -4,18 +4,18 @@ import { BrowserRouter as Router } from "react-router-dom";
 import App from "./App";
 import "./styles/global.css";
 import "./firebase";
-
-// 🔥 Import AuthProvider
 import { AuthProvider } from "./context/AuthContext";
+import { ToastProvider } from "./components/Toast";  // 🔥 add
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <AuthProvider>
-      <Router>
-        <App />
-      </Router>
+      <ToastProvider>          {/* 🔥 wrap */}
+        <Router>
+          <App />
+        </Router>
+      </ToastProvider>
     </AuthProvider>
   </React.StrictMode>
 );
-
 

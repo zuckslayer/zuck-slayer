@@ -3,6 +3,7 @@ import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../firebase";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useToast } from "../components/Toast";
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -11,14 +12,16 @@ function Login() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
     setLoading(true);
-    try {
+        try {
       await signInWithEmailAndPassword(auth, email, password);
-      navigate("/");
+      showToast("Welcome back to the chaos.", "success");
+      setTimeout(() => navigate("/"), 600);
     } catch (err) {
       const msg = err.message
         .replace("Firebase: ", "")
@@ -26,6 +29,7 @@ function Login() {
         .replace("Error (auth/user-not-found).", "No account found with this email.")
         .replace("Error (auth/wrong-password).", "Incorrect password.");
       setError(msg);
+      showToast(msg, "error");
     } finally {
       setLoading(false);
     }

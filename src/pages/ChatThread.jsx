@@ -7,9 +7,9 @@ import {
   query,
   orderBy,
   onSnapshot,
-  addDoc,
   serverTimestamp,
   updateDoc,
+  writeBatch,          // 🔥 add this
 } from "firebase/firestore";
 import { useAuth } from "../context/AuthContext";
 import { useParams, Link, useNavigate } from "react-router-dom";
@@ -57,8 +57,25 @@ function ChatThread() {
         }
 
         const otherId = data.participants.find((p) => p !== currentUser.uid);
-        const profile = data.participantProfiles?.[otherId];
-        setOtherUser({ id: otherId, ...profile });
+        
+        // 🔥 Always fetch the LIVE user profile (not stale participantProfiles)
+        let liveProfile = null;
+        try {
+          const userSnap = await getDoc(doc(db, "users", otherId));
+          if (userSnap.exists()) {
+            liveProfile = userSnap.data();
+          }
+        } catch (err) {
+          console.error("Failed to fetch user profile:", err);
+        }
+
+        // Use live data, fallback to participantProfiles
+        const fallback = data.participantProfiles?.[otherId] || {};
+        setOtherUser({
+          id: otherId,
+          username: liveProfile?.username || fallback.username || "user",
+          photoURL: liveProfile?.photoURL || fallback.photoURL || "",
+        });
 
         // Derive the shared AES key between the two users
         const key = await deriveConversationKey(currentUser.uid, otherId);
@@ -67,6 +84,7 @@ function ChatThread() {
         // 🔥 Mark conversation as read for the current user
         await updateDoc(convRef, {
           [`lastReadAt.${currentUser.uid}`]: serverTimestamp(),
+          [`lastReadAtMs.${currentUser.uid}`]: Date.now(),
         });
 
         setLoading(false);
@@ -108,6 +126,7 @@ function ChatThread() {
     const convRef = doc(db, "conversations", conversationId);
     updateDoc(convRef, {
       [`lastReadAt.${currentUser.uid}`]: serverTimestamp(),
+      [`lastReadAtMs.${currentUser.uid}`]: Date.now(),
     }).catch(() => {});
   }, [messages.length, conversationId, currentUser]);
 
@@ -154,37 +173,45 @@ function ChatThread() {
   // SEND MESSAGE
   // ─────────────────────────────────────
   const handleSend = async (e) => {
-    e.preventDefault();
-    if (!input.trim() || sending || !convKey) return;
+  e.preventDefault();
+  if (!input.trim() || sending || !convKey) return;
 
-    const text = input.trim();
-    setInput("");
-    setSending(true);
+  const text = input.trim();
+  setInput("");
+  setSending(true);
 
-    try {
-      const encrypted = await encryptMessage(text, convKey);
+  try {
+    const encrypted = await encryptMessage(text, convKey);
+    const now = Date.now();
 
-      const messagesRef = collection(db, "conversations", conversationId, "messages");
-      await addDoc(messagesRef, {
-        senderId: currentUser.uid,
-        text: encrypted,
-        createdAt: serverTimestamp(),
-      });
+    // 🔥 Atomic batch — message + conversation update in ONE round trip
+    const batch = writeBatch(db);
+    const msgRef = doc(collection(db, "conversations", conversationId, "messages"));
+    const convRef = doc(db, "conversations", conversationId);
 
-      const convRef = doc(db, "conversations", conversationId);
-      await updateDoc(convRef, {
-        lastMessage: encrypted,
-        lastMessageSenderId: currentUser.uid,
-        lastMessageAt: serverTimestamp(),
-      });
-    } catch (err) {
-      console.error("Send failed:", err);
-      setError("Message failed to send.");
-      setInput(text);
-    } finally {
-      setSending(false);
-    }
-  };
+    batch.set(msgRef, {
+      senderId: currentUser.uid,
+      text: encrypted,
+      createdAt: serverTimestamp(),
+      createdAtMs: now,
+    });
+
+    batch.update(convRef, {
+      lastMessage: encrypted,
+      lastMessageSenderId: currentUser.uid,
+      lastMessageAt: serverTimestamp(),
+      lastMessageAtMs: now,           // 🔥 instant client timestamp
+    });
+
+    await batch.commit();
+  } catch (err) {
+    console.error("Send failed:", err);
+    setError("Message failed to send.");
+    setInput(text);
+  } finally {
+    setSending(false);
+  }
+};
 
   // ─────────────────────────────────────
   // TIME FORMATTERS
@@ -249,7 +276,7 @@ function ChatThread() {
   // MAIN RENDER
   // ─────────────────────────────────────
   return (
-    <div className="max-w-3xl mx-auto flex flex-col h-[calc(100dvh-160px)] md:h-[calc(100dvh-100px)]">
+    <div className="max-w-3xl mx-auto flex flex-col h-[calc(100dvh-104px)] md:h-[calc(100dvh-96px)]">
 
       {/* ═══ Header ═══ */}
       <div className="flex items-center gap-3 pb-4 border-b border-white/5">

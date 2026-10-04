@@ -4,6 +4,7 @@ import { auth, db } from "../firebase";
 import { doc, setDoc, collection, query, where, getDocs, serverTimestamp } from "firebase/firestore";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useToast } from "../components/Toast";
 
 function Signup() {
   const [email, setEmail] = useState("");
@@ -13,6 +14,7 @@ function Signup() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
   const getPasswordStrength = () => {
     let strength = 0;
@@ -52,13 +54,15 @@ function Signup() {
         createdAt: serverTimestamp(),
       });
 
-      navigate("/");
+            showToast("Welcome to the rebellion. Account created.", "success");
+      setTimeout(() => navigate("/"), 800);
     } catch (err) {
       const msg = err.message
         .replace("Firebase: ", "")
         .replace("Error (auth/email-already-in-use).", "That email is already in the rebellion.")
         .replace("Error (auth/weak-password).", "Password too weak. Give it some muscle.");
       setError(msg);
+      showToast(msg, "error");
     } finally {
       setLoading(false);
     }

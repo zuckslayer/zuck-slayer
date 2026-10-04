@@ -35,13 +35,13 @@ function Navbar() {
 
     const unsub = onSnapshot(q, (snap) => {
       const anyUnread = snap.docs.some((d) => {
-        const data = d.data();
-        if (!data.lastMessageAt) return false;
+      const data = d.data();
         if (data.lastMessageSenderId === currentUser.uid) return false;
-        const lastMsg = data.lastMessageAt.seconds || 0;
-        const lastRead = data.lastReadAt?.[currentUser.uid]?.seconds || 0;
-        return lastMsg > lastRead;
-      });
+        // 🔥 Use client-side ms timestamp for instant detection
+      const lastMsg = data.lastMessageAtMs || 0;
+      const lastRead = data.lastReadAtMs?.[currentUser.uid] || 0;
+      return lastMsg > lastRead;
+    });
       setHasUnread(anyUnread);
     });
 

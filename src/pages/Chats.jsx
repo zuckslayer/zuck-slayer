@@ -5,18 +5,19 @@ import {
   query,
   where,
   onSnapshot,
-  orderBy,
   getDocs,
   addDoc,
   serverTimestamp,
-  limit,
+  doc,        // 🔥 add
+  getDoc,     // 🔥 add
 } from "firebase/firestore";
 import { useAuth } from "../context/AuthContext";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 
 function Chats() {
-  const { currentUser } = useAuth();
+  const [liveProfiles, setLiveProfiles] = useState({});
+  const { currentUser, userProfile } = useAuth();
   const [conversations, setConversations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showNewChat, setShowNewChat] = useState(false);
@@ -31,15 +32,55 @@ function Chats() {
       where("participants", "array-contains", currentUser.uid)
     );
 
+    useEffect(() => {
+  if (!conversations.length) return;
+
+    const fetchMissingProfiles = async () => {
+    const newProfiles = { ...liveProfiles };
+    let changed = false;
+
+    for (const conv of conversations) {
+      const otherId = conv.participants.find((p) => p !== currentUser.uid);
+      if (!otherId || newProfiles[otherId]) continue;
+
+      try {
+        const snap = await getDoc(doc(db, "users", otherId));
+        if (snap.exists()) {
+          newProfiles[otherId] = snap.data();
+          changed = true;
+        }
+      } catch (err) {
+        console.error("Failed to fetch profile:", err);
+      }
+    }
+
+      if (changed) setLiveProfiles(newProfiles);
+  };
+
+      fetchMissingProfiles();
+  } , [conversations, currentUser]);
+
+    // 🔥 Updated getOtherUser — prefers live profile over stale snapshot
+    const getOtherUser = (conv) => {
+    const otherId = conv.participants.find((p) => p !== currentUser.uid);
+    const live = liveProfiles[otherId];
+    const stored = conv.participantProfiles?.[otherId] || {};
+      return {
+      id: otherId,
+      username: live?.username || stored.username || "user",
+      photoURL: live?.photoURL || stored.photoURL || "",
+    };
+  };
+
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const data = snapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }));
-      // Sort by lastMessageAt desc client-side (avoids composite index)
+      // 🔥 Sort using client-side ms timestamp first, fall back to server
       data.sort((a, b) => {
-        const aTime = a.lastMessageAt?.seconds || a.createdAt?.seconds || 0;
-        const bTime = b.lastMessageAt?.seconds || b.createdAt?.seconds || 0;
+        const aTime = a.lastMessageAtMs || a.lastMessageAt?.seconds * 1000 || a.createdAt?.seconds * 1000 || 0;
+        const bTime = b.lastMessageAtMs || b.lastMessageAt?.seconds * 1000 || b.createdAt?.seconds * 1000 || 0;
         return bTime - aTime;
       });
       setConversations(data);
@@ -52,6 +93,14 @@ function Chats() {
   const getOtherUser = (conv) => {
     const otherId = conv.participants.find((p) => p !== currentUser.uid);
     return conv.participantProfiles?.[otherId] || { username: "user", photoURL: "" };
+  };
+
+  // 🔥 Unread detection using client-side ms timestamps (instant, no server delay)
+  const hasUnread = (conv) => {
+    if (conv.lastMessageSenderId === currentUser.uid) return false;
+    const lastMsg = conv.lastMessageAtMs || 0;
+    const lastRead = conv.lastReadAtMs?.[currentUser.uid] || 0;
+    return lastMsg > lastRead;
   };
 
   const formatTime = (timestamp) => {
@@ -122,43 +171,54 @@ function Chats() {
         <div className="space-y-2">
           {conversations.map((conv) => {
             const other = getOtherUser(conv);
+            const unread = hasUnread(conv);
+
             return (
               <Link
                 key={conv.id}
                 to={`/chats/${conv.id}`}
-                className="flex items-center gap-4 p-4 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-pink-500/30 hover:bg-white/[0.04] transition-all group"
+                className={`flex items-center gap-4 p-4 rounded-2xl border transition-all group ${
+                  unread
+                    ? "bg-gradient-to-r from-pink-500/[0.06] to-blue-500/[0.03] border-pink-500/25 hover:border-pink-500/50"
+                    : "bg-white/[0.02] border-white/5 hover:border-pink-500/30 hover:bg-white/[0.04]"
+                }`}
               >
-                {/* Avatar */}
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-pink-500 via-purple-500 to-blue-600 flex items-center justify-center overflow-hidden shrink-0">
-                  {other.photoURL ? (
-                    <img src={other.photoURL} alt="" className="w-full h-full object-cover" />
-                  ) : (
-                    <span className="text-lg font-black text-white">
-                      {other.username?.charAt(0).toUpperCase() || "?"}
-                    </span>
+                {/* Avatar with pink dot badge */}
+                <div className="relative shrink-0">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-pink-500 via-purple-500 to-blue-600 flex items-center justify-center overflow-hidden">
+                    {other.photoURL ? (
+                      <img src={other.photoURL} alt="" className="w-full h-full object-cover" />
+                    ) : (
+                      <span className="text-lg font-black text-white">
+                        {other.username?.charAt(0).toUpperCase() || "?"}
+                      </span>
+                    )}
+                  </div>
+                  {unread && (
+                    <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-pink-500 border-2 border-[#0a0a0a] shadow-[0_0_10px_rgba(236,72,153,0.9)] animate-pulse"></span>
                   )}
                 </div>
 
                 {/* Info */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between mb-1">
-                    <p className="text-sm font-bold text-white truncate">
+                    <p className={`text-sm truncate ${unread ? "font-black text-white" : "font-bold text-white"}`}>
                       @{other.username || "user"}
                     </p>
-                    <span className="text-[10px] text-gray-500 font-mono shrink-0 ml-2">
+                    <span className={`text-[10px] font-mono shrink-0 ml-2 ${unread ? "text-pink-400 font-bold" : "text-gray-500"}`}>
                       {formatTime(conv.lastMessageAt || conv.createdAt)}
                     </span>
                   </div>
-                  <p className="text-xs text-gray-500 truncate flex items-center gap-1.5">
+                  <p className={`text-xs truncate flex items-center gap-1.5 ${unread ? "text-pink-300" : "text-gray-500"}`}>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3 h-3 shrink-0">
                       <path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
-                    Encrypted · Tap to open
+                    {unread ? "New message · Tap to open" : "Encrypted · Tap to open"}
                   </p>
                 </div>
 
                 {/* Chevron */}
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5 text-gray-600 group-hover:text-pink-400 group-hover:translate-x-1 transition-all shrink-0">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={`w-5 h-5 group-hover:translate-x-1 transition-all shrink-0 ${unread ? "text-pink-400" : "text-gray-600 group-hover:text-pink-400"}`}>
                   <path d="M9 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </Link>
@@ -173,6 +233,7 @@ function Chats() {
           <NewChatModal
             onClose={() => setShowNewChat(false)}
             currentUser={currentUser}
+            userProfile={userProfile}
           />
         )}
       </AnimatePresence>
@@ -183,7 +244,7 @@ function Chats() {
 // ═══════════════════════════════════════════════
 // NEW CHAT MODAL
 // ═══════════════════════════════════════════════
-function NewChatModal({ onClose, currentUser }) {
+function NewChatModal({ onClose, currentUser, userProfile }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [results, setResults] = useState([]);
   const [searching, setSearching] = useState(false);
@@ -191,41 +252,40 @@ function NewChatModal({ onClose, currentUser }) {
 
   // Live search as user types
   useEffect(() => {
-  const trimmed = searchTerm.trim().toLowerCase();
-  if (trimmed.length === 0) {
-    setResults([]);
-    return;
-  }
-
-  const timer = setTimeout(async () => {
-    setSearching(true);
-    try {
-      const usersRef = collection(db, "users");
-      const snap = await getDocs(usersRef); // 🔥 no limit
-      const filtered = snap.docs
-        .map((d) => ({ id: d.id, ...d.data() }))
-        .filter((u) => u.id !== currentUser.uid)
-        .filter((u) => {
-          const name = (u.username || "").toLowerCase();
-          const email = (u.email || "").toLowerCase();
-          return name.includes(trimmed) || email.includes(trimmed);
-        })
-        .slice(0, 20);
-      setResults(filtered);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setSearching(false);
+    const trimmed = searchTerm.trim().toLowerCase();
+    if (trimmed.length === 0) {
+      setResults([]);
+      return;
     }
-  }, 200);
 
-  return () => clearTimeout(timer);
-}, [searchTerm, currentUser]);
+    const timer = setTimeout(async () => {
+      setSearching(true);
+      try {
+        const usersRef = collection(db, "users");
+        const snap = await getDocs(usersRef);
+        const filtered = snap.docs
+          .map((d) => ({ id: d.id, ...d.data() }))
+          .filter((u) => u.id !== currentUser.uid)
+          .filter((u) => {
+            const name = (u.username || "").toLowerCase();
+            const email = (u.email || "").toLowerCase();
+            return name.includes(trimmed) || email.includes(trimmed);
+          })
+          .slice(0, 20);
+        setResults(filtered);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setSearching(false);
+      }
+    }, 200);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm, currentUser]);
 
   const startChat = async (otherUser) => {
     setError("");
     try {
-      // Check if a conversation already exists
       const convRef = collection(db, "conversations");
       const q = query(convRef, where("participants", "array-contains", currentUser.uid));
       const snap = await getDocs(q);
@@ -240,13 +300,13 @@ function NewChatModal({ onClose, currentUser }) {
         return;
       }
 
-      // Create new conversation
+      // 🔥 Use REAL username from userProfile, not "you"
       const newDoc = await addDoc(convRef, {
         participants: [currentUser.uid, otherUser.id],
         participantProfiles: {
           [currentUser.uid]: {
-            username: "you", // will be updated by listener
-            photoURL: "",
+            username: userProfile?.username || "user",
+            photoURL: userProfile?.photoURL || "",
           },
           [otherUser.id]: {
             username: otherUser.username || "user",
@@ -256,6 +316,7 @@ function NewChatModal({ onClose, currentUser }) {
         lastMessage: "",
         lastMessageSenderId: "",
         lastMessageAt: serverTimestamp(),
+        lastMessageAtMs: Date.now(),
         createdAt: serverTimestamp(),
       });
 
@@ -286,7 +347,7 @@ function NewChatModal({ onClose, currentUser }) {
         <div className="p-6 border-b border-white/5 flex items-center justify-between">
           <div>
             <h3 className="text-xl font-bold text-white">New Message</h3>
-            <p className="text-xs text-gray-500 mt-1">Search by username</p>
+            <p className="text-xs text-gray-500 mt-1">Search by username or email</p>
           </div>
           <button
             onClick={onClose}
@@ -311,7 +372,7 @@ function NewChatModal({ onClose, currentUser }) {
               autoFocus
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search @username..."
+              placeholder="Search @username or email..."
               className="w-full pl-12 pr-4 py-3.5 rounded-xl bg-black/40 border border-white/10 text-white placeholder-gray-600 focus:outline-none focus:border-pink-500/50 transition-all"
             />
           </div>
@@ -322,9 +383,9 @@ function NewChatModal({ onClose, currentUser }) {
           {searching && (
             <p className="text-center text-xs text-gray-500 py-8 font-mono">Searching...</p>
           )}
-          {!searching && searchTerm.length >= 2 && results.length === 0 && (
+          {!searching && searchTerm.length > 0 && results.length === 0 && (
             <p className="text-center text-xs text-gray-500 py-8 font-mono">
-              No user found with "@{searchTerm}"
+              No user found with "{searchTerm}"
             </p>
           )}
           {!searching && searchTerm.length === 0 && (
