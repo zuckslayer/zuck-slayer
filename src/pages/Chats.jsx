@@ -8,17 +8,17 @@ import {
   getDocs,
   addDoc,
   serverTimestamp,
-  doc,        // 🔥 add
-  getDoc,     // 🔥 add
+  doc,
+  getDoc,
 } from "firebase/firestore";
 import { useAuth } from "../context/AuthContext";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 
 function Chats() {
-  const [liveProfiles, setLiveProfiles] = useState({});
   const { currentUser, userProfile } = useAuth();
   const [conversations, setConversations] = useState([]);
+  const [liveProfiles, setLiveProfiles] = useState({});
   const [loading, setLoading] = useState(true);
   const [showNewChat, setShowNewChat] = useState(false);
 
@@ -32,52 +32,11 @@ function Chats() {
       where("participants", "array-contains", currentUser.uid)
     );
 
-    useEffect(() => {
-  if (!conversations.length) return;
-
-    const fetchMissingProfiles = async () => {
-    const newProfiles = { ...liveProfiles };
-    let changed = false;
-
-    for (const conv of conversations) {
-      const otherId = conv.participants.find((p) => p !== currentUser.uid);
-      if (!otherId || newProfiles[otherId]) continue;
-
-      try {
-        const snap = await getDoc(doc(db, "users", otherId));
-        if (snap.exists()) {
-          newProfiles[otherId] = snap.data();
-          changed = true;
-        }
-      } catch (err) {
-        console.error("Failed to fetch profile:", err);
-      }
-    }
-
-      if (changed) setLiveProfiles(newProfiles);
-  };
-
-      fetchMissingProfiles();
-  } , [conversations, currentUser]);
-
-    // 🔥 Updated getOtherUser — prefers live profile over stale snapshot
-    const getOtherUser = (conv) => {
-    const otherId = conv.participants.find((p) => p !== currentUser.uid);
-    const live = liveProfiles[otherId];
-    const stored = conv.participantProfiles?.[otherId] || {};
-      return {
-      id: otherId,
-      username: live?.username || stored.username || "user",
-      photoURL: live?.photoURL || stored.photoURL || "",
-    };
-  };
-
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      const data = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
+      const data = snapshot.docs.map((docSnap) => ({
+        id: docSnap.id,
+        ...docSnap.data(),
       }));
-      // 🔥 Sort using client-side ms timestamp first, fall back to server
       data.sort((a, b) => {
         const aTime = a.lastMessageAtMs || a.lastMessageAt?.seconds * 1000 || a.createdAt?.seconds * 1000 || 0;
         const bTime = b.lastMessageAtMs || b.lastMessageAt?.seconds * 1000 || b.createdAt?.seconds * 1000 || 0;
@@ -90,12 +49,47 @@ function Chats() {
     return () => unsubscribe();
   }, [currentUser]);
 
+  // 🔥 Fetch live user profiles for all conversation partners
+  useEffect(() => {
+    if (!conversations.length || !currentUser) return;
+
+    const fetchMissingProfiles = async () => {
+      const newProfiles = { ...liveProfiles };
+      let changed = false;
+
+      for (const conv of conversations) {
+        const otherId = conv.participants?.find((p) => p !== currentUser.uid);
+        if (!otherId || newProfiles[otherId]) continue;
+
+        try {
+          const snap = await getDoc(doc(db, "users", otherId));
+          if (snap.exists()) {
+            newProfiles[otherId] = snap.data();
+            changed = true;
+          }
+        } catch (err) {
+          console.error("Failed to fetch profile:", err);
+        }
+      }
+
+      if (changed) setLiveProfiles(newProfiles);
+    };
+
+    fetchMissingProfiles();
+  }, [conversations, currentUser]);
+
+  // 🔥 Prefer live profile over stale snapshot
   const getOtherUser = (conv) => {
     const otherId = conv.participants.find((p) => p !== currentUser.uid);
-    return conv.participantProfiles?.[otherId] || { username: "user", photoURL: "" };
+    const live = liveProfiles[otherId];
+    const stored = conv.participantProfiles?.[otherId] || {};
+    return {
+      id: otherId,
+      username: live?.username || stored.username || "user",
+      photoURL: live?.photoURL || stored.photoURL || "",
+    };
   };
 
-  // 🔥 Unread detection using client-side ms timestamps (instant, no server delay)
   const hasUnread = (conv) => {
     if (conv.lastMessageSenderId === currentUser.uid) return false;
     const lastMsg = conv.lastMessageAtMs || 0;
@@ -183,7 +177,6 @@ function Chats() {
                     : "bg-white/[0.02] border-white/5 hover:border-pink-500/30 hover:bg-white/[0.04]"
                 }`}
               >
-                {/* Avatar with pink dot badge */}
                 <div className="relative shrink-0">
                   <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-pink-500 via-purple-500 to-blue-600 flex items-center justify-center overflow-hidden">
                     {other.photoURL ? (
@@ -199,7 +192,6 @@ function Chats() {
                   )}
                 </div>
 
-                {/* Info */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between mb-1">
                     <p className={`text-sm truncate ${unread ? "font-black text-white" : "font-bold text-white"}`}>
@@ -217,7 +209,6 @@ function Chats() {
                   </p>
                 </div>
 
-                {/* Chevron */}
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={`w-5 h-5 group-hover:translate-x-1 transition-all shrink-0 ${unread ? "text-pink-400" : "text-gray-600 group-hover:text-pink-400"}`}>
                   <path d="M9 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
@@ -227,7 +218,6 @@ function Chats() {
         </div>
       )}
 
-      {/* New Chat Modal */}
       <AnimatePresence>
         {showNewChat && (
           <NewChatModal
@@ -250,7 +240,6 @@ function NewChatModal({ onClose, currentUser, userProfile }) {
   const [searching, setSearching] = useState(false);
   const [error, setError] = useState("");
 
-  // Live search as user types
   useEffect(() => {
     const trimmed = searchTerm.trim().toLowerCase();
     if (trimmed.length === 0) {
@@ -300,7 +289,6 @@ function NewChatModal({ onClose, currentUser, userProfile }) {
         return;
       }
 
-      // 🔥 Use REAL username from userProfile, not "you"
       const newDoc = await addDoc(convRef, {
         participants: [currentUser.uid, otherUser.id],
         participantProfiles: {
@@ -343,7 +331,6 @@ function NewChatModal({ onClose, currentUser, userProfile }) {
         onClick={(e) => e.stopPropagation()}
         className="w-full max-w-md bg-[#111111] border border-white/10 rounded-3xl shadow-2xl overflow-hidden"
       >
-        {/* Header */}
         <div className="p-6 border-b border-white/5 flex items-center justify-between">
           <div>
             <h3 className="text-xl font-bold text-white">New Message</h3>
@@ -359,7 +346,6 @@ function NewChatModal({ onClose, currentUser, userProfile }) {
           </button>
         </div>
 
-        {/* Search input */}
         <div className="p-4">
           <div className="relative">
             <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">
@@ -378,7 +364,6 @@ function NewChatModal({ onClose, currentUser, userProfile }) {
           </div>
         </div>
 
-        {/* Results */}
         <div className="max-h-80 overflow-y-auto px-4 pb-4">
           {searching && (
             <p className="text-center text-xs text-gray-500 py-8 font-mono">Searching...</p>
