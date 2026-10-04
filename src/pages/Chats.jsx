@@ -14,6 +14,7 @@ import {
 import { useAuth } from "../context/AuthContext";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import { Link, useNavigate } from "react-router-dom";
 
 function Chats() {
   const { currentUser, userProfile } = useAuth();
@@ -239,6 +240,7 @@ function NewChatModal({ onClose, currentUser, userProfile }) {
   const [results, setResults] = useState([]);
   const [searching, setSearching] = useState(false);
   const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     const trimmed = searchTerm.trim().toLowerCase();
@@ -285,7 +287,7 @@ function NewChatModal({ onClose, currentUser, userProfile }) {
 
       if (existing) {
         onClose();
-        window.location.href = `/chats/${existing.id}`;
+        navigate(`/chats/${existing.id}`);
         return;
       }
 
@@ -309,7 +311,7 @@ function NewChatModal({ onClose, currentUser, userProfile }) {
       });
 
       onClose();
-      window.location.href = `/chats/${newDoc.id}`;
+      navigate(`/chats/${newDoc.id}`);
     } catch (err) {
       console.error(err);
       setError("Failed to start chat. Try again.");
