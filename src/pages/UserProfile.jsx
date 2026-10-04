@@ -104,7 +104,7 @@ function UserProfile() {
       setTimeout(() => setBurst(false), 1800);
     }
 
-    // Optimistic UI update — instant feedback
+    // Optimistic UI update
     setFollowing(!wasFollowing);
 
     try {
@@ -120,7 +120,6 @@ function UserProfile() {
       }
     } catch (err) {
       console.error("Follow action failed:", err);
-      // Revert on failure
       setFollowing(wasFollowing);
       setError("Follow failed. Try again.");
     } finally {
@@ -203,6 +202,7 @@ function UserProfile() {
   const isOwnProfile = currentUser?.uid === profileUser.id;
   const followersCount = profileUser.followers?.length || 0;
   const followingCount = profileUser.following?.length || 0;
+  const canSeePosts = !profileUser.isPrivate || isOwnProfile || following;
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 text-white relative">
@@ -297,7 +297,7 @@ function UserProfile() {
               );
             })}
 
-            {/* Center FOLLOWING text reveal */}
+            {/* Center FOLLOWED text reveal */}
             <motion.div
               className="absolute"
               initial={{ scale: 0, opacity: 0, y: 20 }}
@@ -344,6 +344,16 @@ function UserProfile() {
                   </span>
                 )}
               </div>
+              {/* 🔥 Private badge */}
+              {profileUser.isPrivate && (
+                <div className="absolute -bottom-1 -right-1 w-8 h-8 rounded-lg bg-[#111111] border-2 border-[#111111] flex items-center justify-center">
+                  <div className="w-full h-full rounded-lg bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" className="w-3.5 h-3.5">
+                      <path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="flex gap-2 flex-wrap">
@@ -367,7 +377,6 @@ function UserProfile() {
                 </>
               ) : (
                 <>
-                  {/* 🔥 Animated Follow Button */}
                   <motion.button
                     onClick={handleFollow}
                     disabled={followLoading}
@@ -427,13 +436,22 @@ function UserProfile() {
           </div>
 
           <div className="space-y-2">
-            <h1 className="text-3xl font-black text-white tracking-tight">@{profileUser.username}</h1>
+            <h1 className="text-3xl font-black text-white tracking-tight flex items-center gap-2">
+              @{profileUser.username}
+              {profileUser.isPrivate && (
+                <span className="text-xs font-bold text-pink-400 bg-pink-500/10 border border-pink-500/20 px-2 py-1 rounded-md uppercase tracking-widest">
+                  Private
+                </span>
+              )}
+            </h1>
             {profileUser.bio && <p className="text-gray-400 text-sm">{profileUser.bio}</p>}
           </div>
 
           <div className="flex gap-8 mt-6 pt-6 border-t border-white/5">
             <div>
-              <p className="text-2xl font-bold text-white">{posts.length}</p>
+              <p className="text-2xl font-bold text-white">
+                {canSeePosts ? posts.length : "—"}
+              </p>
               <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Posts</p>
             </div>
             <div>
@@ -448,17 +466,32 @@ function UserProfile() {
         </div>
       </motion.div>
 
-      {/* ═══ Posts Grid ═══ */}
+      {/* ═══ Posts Section ═══ */}
       <div className="mb-6">
         <h2 className="text-2xl font-bold text-white tracking-tight">
           {isOwnProfile ? "Your Posts" : `Posts by @${profileUser.username}`}
         </h2>
       </div>
 
-      {posts.length === 0 ? (
+      {/* 🔥 Private lock / Empty / Grid */}
+      {!canSeePosts ? (
+        <div className="bg-[#111111] border border-white/5 rounded-2xl p-16 text-center">
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-pink-500/20 to-blue-500/20 border border-white/10 flex items-center justify-center mx-auto mb-6">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-8 h-8 text-pink-400">
+              <path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </div>
+          <h3 className="text-xl font-bold text-white mb-2">This Account is Private</h3>
+          <p className="text-gray-500 text-sm max-w-sm mx-auto">
+            Follow @{profileUser.username} to see their posts.
+          </p>
+        </div>
+      ) : posts.length === 0 ? (
         <div className="bg-[#111111] border border-white/5 rounded-2xl p-16 text-center">
           <p className="text-gray-500 font-mono text-sm">
-            {isOwnProfile ? "You haven't posted anything yet." : `@${profileUser.username} hasn't posted anything yet.`}
+            {isOwnProfile
+              ? "You haven't posted anything yet."
+              : `@${profileUser.username} hasn't posted anything yet.`}
           </p>
           {isOwnProfile && (
             <Link
@@ -481,7 +514,11 @@ function UserProfile() {
                 post.url.includes(".mp4") || post.url.includes("video") ? (
                   <video src={post.url} className="w-full h-full object-cover" />
                 ) : (
-                  <img src={post.url} alt="" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                  <img
+                    src={post.url}
+                    alt=""
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                  />
                 )
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-gray-600 text-xs font-mono">
@@ -489,7 +526,9 @@ function UserProfile() {
                 </div>
               )}
               <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                <p className="text-white text-xs text-center line-clamp-3 px-4">{post.caption || "No caption"}</p>
+                <p className="text-white text-xs text-center line-clamp-3 px-4">
+                  {post.caption || "No caption"}
+                </p>
               </div>
             </Link>
           ))}
