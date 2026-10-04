@@ -12,7 +12,6 @@ import {
   getDoc,
 } from "firebase/firestore";
 import { useAuth } from "../context/AuthContext";
-import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 

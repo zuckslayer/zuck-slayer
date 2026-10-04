@@ -9,7 +9,7 @@ import {
   onSnapshot,
   serverTimestamp,
   updateDoc,
-  writeBatch,          // 🔥 add this
+  writeBatch,
 } from "firebase/firestore";
 import { useAuth } from "../context/AuthContext";
 import { useParams, Link, useNavigate } from "react-router-dom";
@@ -57,19 +57,16 @@ function ChatThread() {
         }
 
         const otherId = data.participants.find((p) => p !== currentUser.uid);
-        
-        // 🔥 Always fetch the LIVE user profile (not stale participantProfiles)
+
+        // 🔥 Always fetch LIVE user profile (not stale participantProfiles)
         let liveProfile = null;
         try {
           const userSnap = await getDoc(doc(db, "users", otherId));
-          if (userSnap.exists()) {
-            liveProfile = userSnap.data();
-          }
+          if (userSnap.exists()) liveProfile = userSnap.data();
         } catch (err) {
           console.error("Failed to fetch user profile:", err);
         }
 
-        // Use live data, fallback to participantProfiles
         const fallback = data.participantProfiles?.[otherId] || {};
         setOtherUser({
           id: otherId,
@@ -81,7 +78,7 @@ function ChatThread() {
         const key = await deriveConversationKey(currentUser.uid, otherId);
         setConvKey(key);
 
-        // 🔥 Mark conversation as read for the current user
+        // Mark as read
         await updateDoc(convRef, {
           [`lastReadAt.${currentUser.uid}`]: serverTimestamp(),
           [`lastReadAtMs.${currentUser.uid}`]: Date.now(),
@@ -119,7 +116,7 @@ function ChatThread() {
   }, [conversationId]);
 
   // ─────────────────────────────────────
-  // 🔥 AUTO-MARK AS READ WHEN NEW MESSAGES ARRIVE
+  // AUTO-MARK AS READ WHEN NEW MESSAGES ARRIVE
   // ─────────────────────────────────────
   useEffect(() => {
     if (!currentUser || !conversationId || messages.length === 0) return;
@@ -173,45 +170,45 @@ function ChatThread() {
   // SEND MESSAGE
   // ─────────────────────────────────────
   const handleSend = async (e) => {
-  e.preventDefault();
-  if (!input.trim() || sending || !convKey) return;
+    e.preventDefault();
+    if (!input.trim() || sending || !convKey) return;
 
-  const text = input.trim();
-  setInput("");
-  setSending(true);
+    const text = input.trim();
+    setInput("");
+    setSending(true);
 
-  try {
-    const encrypted = await encryptMessage(text, convKey);
-    const now = Date.now();
+    try {
+      const encrypted = await encryptMessage(text, convKey);
+      const now = Date.now();
 
-    // 🔥 Atomic batch — message + conversation update in ONE round trip
-    const batch = writeBatch(db);
-    const msgRef = doc(collection(db, "conversations", conversationId, "messages"));
-    const convRef = doc(db, "conversations", conversationId);
+      // 🔥 Atomic batch — message + conversation update in ONE round trip
+      const batch = writeBatch(db);
+      const msgRef = doc(collection(db, "conversations", conversationId, "messages"));
+      const convRef = doc(db, "conversations", conversationId);
 
-    batch.set(msgRef, {
-      senderId: currentUser.uid,
-      text: encrypted,
-      createdAt: serverTimestamp(),
-      createdAtMs: now,
-    });
+      batch.set(msgRef, {
+        senderId: currentUser.uid,
+        text: encrypted,
+        createdAt: serverTimestamp(),
+        createdAtMs: now,
+      });
 
-    batch.update(convRef, {
-      lastMessage: encrypted,
-      lastMessageSenderId: currentUser.uid,
-      lastMessageAt: serverTimestamp(),
-      lastMessageAtMs: now,           // 🔥 instant client timestamp
-    });
+      batch.update(convRef, {
+        lastMessage: encrypted,
+        lastMessageSenderId: currentUser.uid,
+        lastMessageAt: serverTimestamp(),
+        lastMessageAtMs: now,
+      });
 
-    await batch.commit();
-  } catch (err) {
-    console.error("Send failed:", err);
-    setError("Message failed to send.");
-    setInput(text);
-  } finally {
-    setSending(false);
-  }
-};
+      await batch.commit();
+    } catch (err) {
+      console.error("Send failed:", err);
+      setError("Message failed to send.");
+      setInput(text);
+    } finally {
+      setSending(false);
+    }
+  };
 
   // ─────────────────────────────────────
   // TIME FORMATTERS
@@ -289,25 +286,30 @@ function ChatThread() {
           </svg>
         </button>
 
-        <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-pink-500 via-purple-500 to-blue-600 flex items-center justify-center overflow-hidden shrink-0">
-          {otherUser?.photoURL ? (
-            <img src={otherUser.photoURL} alt="" className="w-full h-full object-cover" />
-          ) : (
-            <span className="text-base font-black text-white">
-              {otherUser?.username?.charAt(0).toUpperCase() || "?"}
-            </span>
-          )}
-        </div>
+        <Link
+          to={`/u/${otherUser?.username || ""}`}
+          className="flex items-center gap-3 flex-1 min-w-0 group"
+        >
+          <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-pink-500 via-purple-500 to-blue-600 flex items-center justify-center overflow-hidden shrink-0 group-hover:scale-105 transition-transform">
+            {otherUser?.photoURL ? (
+              <img src={otherUser.photoURL} alt="" className="w-full h-full object-cover" />
+            ) : (
+              <span className="text-base font-black text-white">
+                {otherUser?.username?.charAt(0).toUpperCase() || "?"}
+              </span>
+            )}
+          </div>
 
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-bold text-white truncate">
-            @{otherUser?.username || "user"}
-          </p>
-          <p className="text-[10px] text-gray-500 font-mono flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
-            End-to-end encrypted
-          </p>
-        </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-bold text-white truncate group-hover:text-pink-400 transition-colors">
+              @{otherUser?.username || "user"}
+            </p>
+            <p className="text-[10px] text-gray-500 font-mono flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+              End-to-end encrypted
+            </p>
+          </div>
+        </Link>
       </div>
 
       {/* ═══ Messages ═══ */}
@@ -362,7 +364,6 @@ function ChatThread() {
                         text
                       )}
                     </p>
-                    {/* 🔥 Timestamp — brighter on own messages */}
                     <p className={`text-[10px] mt-1 font-mono ${
                       isMe ? "text-white/90 text-right" : "text-gray-500"
                     }`}>
