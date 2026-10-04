@@ -1,7 +1,9 @@
 import { NavLink, Link, useNavigate } from "react-router-dom";
 import { signOut } from "firebase/auth";
-import { auth } from "../firebase";
+import { auth, db } from "../firebase";
 import { useAuth } from "../context/AuthContext";
+import { useEffect, useState } from "react";
+import { collection, query, where, onSnapshot } from "firebase/firestore";
 
 // 🔥 Professional SVG Icon Components
 const Icons = {
@@ -17,13 +19,40 @@ const Icons = {
 function Navbar() {
   const { currentUser, userProfile } = useAuth();
   const navigate = useNavigate();
+  const [hasUnread, setHasUnread] = useState(false);
+
+  // 🔥 Listen for unread messages across all conversations
+  useEffect(() => {
+    if (!currentUser) {
+      setHasUnread(false);
+      return;
+    }
+
+    const q = query(
+      collection(db, "conversations"),
+      where("participants", "array-contains", currentUser.uid)
+    );
+
+    const unsub = onSnapshot(q, (snap) => {
+      const anyUnread = snap.docs.some((d) => {
+        const data = d.data();
+        if (!data.lastMessageAt) return false;
+        if (data.lastMessageSenderId === currentUser.uid) return false;
+        const lastMsg = data.lastMessageAt.seconds || 0;
+        const lastRead = data.lastReadAt?.[currentUser.uid]?.seconds || 0;
+        return lastMsg > lastRead;
+      });
+      setHasUnread(anyUnread);
+    });
+
+    return () => unsub();
+  }, [currentUser]);
 
   const handleLogout = async () => {
     await signOut(auth);
     navigate("/login");
   };
 
-  // 🔥 Enhanced Hover & Active Link Styling
   const linkClass = ({ isActive }) =>
     `group relative flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 font-medium overflow-hidden ${
       isActive
@@ -39,17 +68,21 @@ function Navbar() {
           <div className="absolute inset-0 bg-gradient-to-r from-pink-500/0 via-pink-500/5 to-purple-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-out" />
           <Icons.Home /> <span className="relative z-10">Home</span>
         </NavLink>
-        
+
         <NavLink to="/feed" className={linkClass}>
           <div className="absolute inset-0 bg-gradient-to-r from-pink-500/0 via-pink-500/5 to-purple-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-out" />
           <Icons.Feed /> <span className="relative z-10">The Chaos Feed</span>
         </NavLink>
 
+        {/* 🔥 Messages with pink unread dot */}
         <NavLink to="/chats" className={linkClass}>
           <div className="absolute inset-0 bg-gradient-to-r from-pink-500/0 via-pink-500/5 to-purple-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-out" />
           <Icons.Chats /> <span className="relative z-10">Messages</span>
+          {hasUnread && (
+            <span className="ml-auto w-2 h-2 rounded-full bg-pink-500 shadow-[0_0_12px_rgba(236,72,153,0.9)] animate-pulse relative z-10"></span>
+          )}
         </NavLink>
-        
+
         {currentUser && (
           <>
             <div className="pt-6 pb-2">
@@ -80,8 +113,7 @@ function Navbar() {
           </div>
         ) : (
           <div className="space-y-2">
-            {/* 🔥 Mini Profile Card */}
-            <Link 
+            <Link
               to="/profile"
               className="flex items-center gap-3 px-3 py-3 bg-white/[0.02] rounded-xl border border-white/5 mb-4 hover:border-pink-500/30 transition-all group"
             >
@@ -99,10 +131,9 @@ function Navbar() {
                 <p className="text-[10px] text-gray-500 font-mono truncate">{currentUser.email}</p>
               </div>
             </Link>
-            
-            {/* Logout Button */}
-            <button 
-              onClick={handleLogout} 
+
+            <button
+              onClick={handleLogout}
               className="group relative flex items-center gap-3 w-full px-4 py-3 rounded-xl text-red-400 hover:text-red-300 transition-all duration-300 font-medium overflow-hidden border border-transparent hover:border-red-500/20 hover:bg-red-500/5 hover:shadow-[0_0_15px_-3px_rgba(239,68,68,0.3)]"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-red-500/0 via-red-500/10 to-red-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-out" />

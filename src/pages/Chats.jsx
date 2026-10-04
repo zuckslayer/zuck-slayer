@@ -191,35 +191,36 @@ function NewChatModal({ onClose, currentUser }) {
 
   // Live search as user types
   useEffect(() => {
-    const trimmed = searchTerm.trim().toLowerCase();
-    if (trimmed.length < 2) {
-      setResults([]);
-      return;
+  const trimmed = searchTerm.trim().toLowerCase();
+  if (trimmed.length === 0) {
+    setResults([]);
+    return;
+  }
+
+  const timer = setTimeout(async () => {
+    setSearching(true);
+    try {
+      const usersRef = collection(db, "users");
+      const snap = await getDocs(usersRef); // 🔥 no limit
+      const filtered = snap.docs
+        .map((d) => ({ id: d.id, ...d.data() }))
+        .filter((u) => u.id !== currentUser.uid)
+        .filter((u) => {
+          const name = (u.username || "").toLowerCase();
+          const email = (u.email || "").toLowerCase();
+          return name.includes(trimmed) || email.includes(trimmed);
+        })
+        .slice(0, 20);
+      setResults(filtered);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSearching(false);
     }
+  }, 200);
 
-    const timer = setTimeout(async () => {
-      setSearching(true);
-      try {
-        const usersRef = collection(db, "users");
-        const snap = await getDocs(query(usersRef, limit(50)));
-        const filtered = snap.docs
-          .map((d) => ({ id: d.id, ...d.data() }))
-          .filter(
-            (u) =>
-              u.id !== currentUser.uid &&
-              u.username?.toLowerCase().includes(trimmed)
-          )
-          .slice(0, 10);
-        setResults(filtered);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setSearching(false);
-      }
-    }, 300);
-
-    return () => clearTimeout(timer);
-  }, [searchTerm, currentUser]);
+  return () => clearTimeout(timer);
+}, [searchTerm, currentUser]);
 
   const startChat = async (otherUser) => {
     setError("");
@@ -326,9 +327,9 @@ function NewChatModal({ onClose, currentUser }) {
               No user found with "@{searchTerm}"
             </p>
           )}
-          {!searching && searchTerm.length < 2 && (
+          {!searching && searchTerm.length === 0 && (
             <p className="text-center text-xs text-gray-600 py-8 font-mono">
-              Type at least 2 characters
+              Start typing to search
             </p>
           )}
           {!searching && results.map((user) => (

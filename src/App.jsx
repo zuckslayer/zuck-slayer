@@ -15,6 +15,7 @@ import Legal from "./pages/Legal";
 import ForgotPassword from "./pages/ForgotPassword";
 import IntroLoader from "./components/IntroLoader";
 import Chats from "./pages/Chats";
+import ChatThread from "./pages/ChatThread";
 
 function App() {
   const [showIntro, setShowIntro] = useState(true);
@@ -40,6 +41,7 @@ function App() {
           <Route path="/edit-profile" element={<PrivateRoute><EditProfile /></PrivateRoute>} />
           <Route path="/settings" element={<PrivateRoute><Settings /></PrivateRoute>} />
           <Route path="/chats" element={<PrivateRoute><Chats /></PrivateRoute>} />
+          <Route path="/chats/:conversationId" element={<PrivateRoute><ChatThread /></PrivateRoute>} />
         </Route>
       </Routes>
 
