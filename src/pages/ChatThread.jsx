@@ -31,20 +31,34 @@ function ChatThread() {
   const [convKey, setConvKey] = useState(null);
   const [decryptedCache, setDecryptedCache] = useState({});
 
-  // ─────────────────────────────────────
-  // LOAD CONVERSATION + DERIVE SHARED KEY
+    // ─────────────────────────────────────
+  // LOAD CONVERSATION + DERIVE SHARED KEY (optimized)
   // ─────────────────────────────────────
   useEffect(() => {
     if (!currentUser || !conversationId) return;
 
+    let cancelled = false;
+
+    // 🔥 Hard failsafe: never stay loading more than 4 seconds
+    const failsafe = setTimeout(() => {
+      if (!cancelled) {
+        console.warn("Chat load timed out — showing UI anyway");
+        setLoading(false);
+      }
+    }, 4000);
+
     const loadConversation = async () => {
       try {
+        // 1. Fetch the conversation
         const convRef = doc(db, "conversations", conversationId);
         const snap = await getDoc(convRef);
+
+        if (cancelled) return;
 
         if (!snap.exists()) {
           setError("Conversation not found.");
           setLoading(false);
+          clearTimeout(failsafe);
           return;
         }
 
@@ -53,46 +67,65 @@ function ChatThread() {
         if (!data.participants?.includes(currentUser.uid)) {
           setError("You're not part of this conversation.");
           setLoading(false);
+          clearTimeout(failsafe);
           return;
         }
 
         const otherId = data.participants.find((p) => p !== currentUser.uid);
 
-        // 🔥 Always fetch LIVE user profile (not stale participantProfiles)
-        let liveProfile = null;
-        try {
-          const userSnap = await getDoc(doc(db, "users", otherId));
-          if (userSnap.exists()) liveProfile = userSnap.data();
-        } catch (err) {
-          console.error("Failed to fetch user profile:", err);
-        }
-
+        // 2. Set user immediately from stored data (fast path)
         const fallback = data.participantProfiles?.[otherId] || {};
         setOtherUser({
           id: otherId,
-          username: liveProfile?.username || fallback.username || "user",
-          photoURL: liveProfile?.photoURL || fallback.photoURL || "",
+          username: fallback.username || "user",
+          photoURL: fallback.photoURL || "",
         });
 
-        // Derive the shared AES key between the two users
+        // 3. Derive key (local, no network — very fast)
         const key = await deriveConversationKey(currentUser.uid, otherId);
+        if (cancelled) return;
         setConvKey(key);
 
-        // Mark as read
-        await updateDoc(convRef, {
+        // 4. Stop loading — UI can render now
+        setLoading(false);
+        clearTimeout(failsafe);
+
+        // 5. Non-blocking background tasks (failures don't matter)
+        //    a. Fetch live profile and patch it in
+        getDoc(doc(db, "users", otherId))
+          .then((userSnap) => {
+            if (!cancelled && userSnap.exists()) {
+              const live = userSnap.data();
+              setOtherUser({
+                id: otherId,
+                username: live.username || fallback.username || "user",
+                photoURL: live.photoURL || fallback.photoURL || "",
+              });
+            }
+          })
+          .catch(() => {});
+
+        //    b. Mark as read (fire and forget)
+        updateDoc(convRef, {
           [`lastReadAt.${currentUser.uid}`]: serverTimestamp(),
           [`lastReadAtMs.${currentUser.uid}`]: Date.now(),
-        });
-
-        setLoading(false);
+        }).catch(() => {});
       } catch (err) {
         console.error("Load conversation failed:", err);
-        setError("Failed to load conversation.");
-        setLoading(false);
+        if (!cancelled) {
+          setError("Failed to load conversation.");
+          setLoading(false);
+        }
+        clearTimeout(failsafe);
       }
     };
 
     loadConversation();
+
+    return () => {
+      cancelled = true;
+      clearTimeout(failsafe);
+    };
   }, [conversationId, currentUser]);
 
   // ─────────────────────────────────────
