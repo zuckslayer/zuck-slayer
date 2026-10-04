@@ -207,107 +207,105 @@ function UserProfile() {
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 text-white relative">
 
-      {/* ═══════════════════════════════════════════
-          🔥 PINK FOLLOW BURST OVERLAY
+            {/* ═══════════════════════════════════════════
+          🔥 PINK FOLLOW BURST — OPTIMIZED FOR PERFORMANCE
           ═══════════════════════════════════════════ */}
       <AnimatePresence>
         {burst && (
           <motion.div
             key="follow-burst"
-            className="fixed inset-0 z-[9998] pointer-events-none flex items-center justify-center overflow-hidden"
+            className="fixed inset-0 z-[9998] pointer-events-none flex items-center justify-center"
+            style={{
+              transform: "translateZ(0)",
+              willChange: "transform, opacity",
+              contain: "layout paint style",
+              isolation: "isolate",
+            }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.2 }}
           >
-            {/* Radial pink pulse rings */}
+            {/* 🔥 Single radial pink blast (replaces 3 rings) */}
             <motion.div
-              className="absolute rounded-full border-4 border-pink-500"
-              style={{ width: 200, height: 200 }}
-              initial={{ scale: 0, opacity: 0.9 }}
-              animate={{ scale: 8, opacity: 0 }}
-              transition={{ duration: 1.2, ease: "easeOut" }}
-            />
-            <motion.div
-              className="absolute rounded-full border-2 border-purple-400"
-              style={{ width: 200, height: 200 }}
-              initial={{ scale: 0, opacity: 0.9 }}
-              animate={{ scale: 12, opacity: 0 }}
-              transition={{ duration: 1.4, ease: "easeOut", delay: 0.15 }}
-            />
-            <motion.div
-              className="absolute rounded-full border border-blue-400"
-              style={{ width: 200, height: 200 }}
-              initial={{ scale: 0, opacity: 0.7 }}
-              animate={{ scale: 16, opacity: 0 }}
-              transition={{ duration: 1.6, ease: "easeOut", delay: 0.3 }}
-            />
-
-            {/* Screen-wide pink wash */}
-            <motion.div
-              className="absolute inset-0"
+              className="absolute rounded-full"
               style={{
+                width: 240,
+                height: 240,
                 background:
-                  "radial-gradient(circle at center, rgba(236,72,153,0.35) 0%, rgba(168,85,247,0.2) 30%, transparent 70%)",
+                  "radial-gradient(circle, rgba(236,72,153,0.8) 0%, rgba(168,85,247,0.4) 40%, transparent 70%)",
+                transform: "translateZ(0)",
+                willChange: "transform, opacity",
               }}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: [0, 1, 0] }}
-              transition={{ duration: 1.2, times: [0, 0.2, 1] }}
+              initial={{ scale: 0.2, opacity: 1 }}
+              animate={{ scale: 12, opacity: 0 }}
+              transition={{ duration: 1.1, ease: "easeOut" }}
             />
 
-            {/* Flying heart particles */}
-            {[...Array(12)].map((_, i) => {
-              const angle = (i / 12) * Math.PI * 2;
-              const distance = 250 + Math.random() * 150;
+            {/* 🔥 One accent ring (replaces 2 extra rings) */}
+            <motion.div
+              className="absolute rounded-full border-2 border-pink-400/70"
+              style={{
+                width: 220,
+                height: 220,
+                transform: "translateZ(0)",
+                willChange: "transform, opacity",
+              }}
+              initial={{ scale: 0.2, opacity: 0.9 }}
+              animate={{ scale: 7, opacity: 0 }}
+              transition={{ duration: 1.2, ease: "easeOut", delay: 0.08 }}
+            />
+
+            {/* 🔥 8 heart particles — no drop-shadow filter (that was the main killer) */}
+            {[...Array(8)].map((_, i) => {
+              const angle = (i / 8) * Math.PI * 2;
+              const distance = 150 + (i % 3) * 50;
               const x = Math.cos(angle) * distance;
               const y = Math.sin(angle) * distance;
               return (
                 <motion.div
                   key={i}
                   className="absolute"
-                  initial={{ x: 0, y: 0, scale: 0, opacity: 0, rotate: 0 }}
+                  style={{
+                    transform: "translateZ(0)",
+                    willChange: "transform, opacity",
+                  }}
+                  initial={{ x: 0, y: 0, scale: 0, opacity: 0 }}
                   animate={{
-                    x,
-                    y,
-                    scale: [0, 1.2, 0.8],
+                    x: [0, x * 0.6, x],
+                    y: [0, y * 0.6, y],
+                    scale: [0, 1, 0.5],
                     opacity: [0, 1, 0],
-                    rotate: Math.random() * 360,
                   }}
                   transition={{
-                    duration: 1.4,
+                    duration: 1.1,
                     ease: "easeOut",
-                    delay: i * 0.03,
+                    delay: i * 0.02,
                   }}
                 >
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="url(#heart-gradient)"
-                    className="w-6 h-6"
-                    style={{ filter: "drop-shadow(0 0 10px rgba(236,72,153,0.9))" }}
-                  >
-                    <defs>
-                      <linearGradient id="heart-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stopColor="#ec4899" />
-                        <stop offset="100%" stopColor="#8b5cf6" />
-                      </linearGradient>
-                    </defs>
+                  <svg viewBox="0 0 24 24" className="w-5 h-5" fill="#ec4899">
                     <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                   </svg>
                 </motion.div>
               );
             })}
 
-            {/* Center FOLLOWED text reveal */}
+            {/* 🔥 FOLLOWED text — static gradient (no re-render per frame) */}
             <motion.div
               className="absolute"
-              initial={{ scale: 0, opacity: 0, y: 20 }}
-              animate={{ scale: [0, 1.2, 1], opacity: [0, 1, 0], y: [20, 0, -30] }}
-              transition={{ duration: 1.6, times: [0, 0.3, 1], ease: "easeOut" }}
+              style={{
+                transform: "translateZ(0)",
+                willChange: "transform, opacity",
+              }}
+              initial={{ scale: 0.5, opacity: 0, y: 10 }}
+              animate={{
+                scale: [0.5, 1.15, 1],
+                opacity: [0, 1, 0],
+                y: [10, 0, -20],
+              }}
+              transition={{ duration: 1.3, times: [0, 0.3, 1], ease: "easeOut" }}
             >
-              <p
-                className="text-4xl md:text-6xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500"
-                style={{ filter: "drop-shadow(0 0 30px rgba(236,72,153,0.8))" }}
-              >
+              <p className="text-3xl md:text-5xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500">
                 FOLLOWED
               </p>
             </motion.div>

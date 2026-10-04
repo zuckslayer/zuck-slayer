@@ -127,11 +127,9 @@ function Feed() {
           </Link>
         </div>
       ) : (
-        <div className="columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6">
-          {posts.map((post) => (
-            <div key={post.id} className="break-inside-avoid">
-              <Post postId={post.id} {...post} url={post.url || ""} />
-            </div>
+        <div className="space-y-2">
+              {posts.map((post) => (
+          <Post key={post.id} postId={post.id} {...post} url={post.url || ""} />
           ))}
         </div>
       )}
