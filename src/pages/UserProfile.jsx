@@ -17,6 +17,7 @@ import {
 import { useAuth } from "../context/AuthContext";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import { createNotification } from "../utils/notifications";
 
 function UserProfile() {
   const { username } = useParams();
@@ -30,9 +31,20 @@ function UserProfile() {
   const [followLoading, setFollowLoading] = useState(false);
   const [error, setError] = useState("");
   const [burst, setBurst] = useState(false);
+  const [myUsername, setMyUsername] = useState("");
 
   // ─────────────────────────────────────
-  // LOAD USER BY USERNAME
+  // FETCH CURRENT USER'S USERNAME (for notifications)
+  // ─────────────────────────────────────
+  useEffect(() => {
+    if (!currentUser) return;
+    getDoc(doc(db, "users", currentUser.uid)).then((snap) => {
+      if (snap.exists()) setMyUsername(snap.data().username || "user");
+    });
+  }, [currentUser]);
+
+  // ─────────────────────────────────────
+  // LOAD PROFILE BY USERNAME
   // ─────────────────────────────────────
   useEffect(() => {
     if (!username) return;
@@ -90,7 +102,7 @@ function UserProfile() {
   }, [profileUser]);
 
   // ─────────────────────────────────────
-  // FOLLOW / UNFOLLOW with pink burst
+  // FOLLOW / UNFOLLOW with pink burst + notification
   // ─────────────────────────────────────
   const handleFollow = async () => {
     if (!currentUser || !profileUser || followLoading) return;
@@ -98,7 +110,7 @@ function UserProfile() {
 
     const wasFollowing = following;
 
-    // 🔥 Trigger burst animation only on new follow
+    // Trigger burst animation only on new follow
     if (!wasFollowing) {
       setBurst(true);
       setTimeout(() => setBurst(false), 1800);
@@ -112,11 +124,22 @@ function UserProfile() {
       const theirRef = doc(db, "users", profileUser.id);
 
       if (wasFollowing) {
+        // 🔹 UNFOLLOW
         await updateDoc(myRef, { following: arrayRemove(profileUser.id) });
         await updateDoc(theirRef, { followers: arrayRemove(currentUser.uid) });
       } else {
+        // 🔹 FOLLOW
         await updateDoc(myRef, { following: arrayUnion(profileUser.id) });
         await updateDoc(theirRef, { followers: arrayUnion(currentUser.uid) });
+
+        // 🔥 Notify the other user about the new follow
+        createNotification({
+          recipientId: profileUser.id,
+          actorId: currentUser.uid,
+          actorUsername: myUsername,
+          actorPhoto: "",
+          type: "follow",
+        });
       }
     } catch (err) {
       console.error("Follow action failed:", err);
@@ -128,7 +151,7 @@ function UserProfile() {
   };
 
   // ─────────────────────────────────────
-  // MESSAGE
+  // MESSAGE — open or create chat
   // ─────────────────────────────────────
   const handleMessage = async () => {
     if (!currentUser || !profileUser) return;
@@ -148,7 +171,7 @@ function UserProfile() {
         const newDoc = await addDoc(convRef, {
           participants: [currentUser.uid, profileUser.id],
           participantProfiles: {
-            [currentUser.uid]: { username: "you", photoURL: "" },
+            [currentUser.uid]: { username: myUsername || "user", photoURL: "" },
             [profileUser.id]: {
               username: profileUser.username,
               photoURL: profileUser.photoURL || "",
@@ -169,9 +192,6 @@ function UserProfile() {
 
   const getInitials = (name) => (name ? name.charAt(0).toUpperCase() : "?");
 
-  // ─────────────────────────────────────
-  // LOADING / ERROR
-  // ─────────────────────────────────────
   if (loading) {
     return (
       <div className="flex justify-center items-center h-[70vh] text-pink-500 font-mono animate-pulse">
@@ -207,9 +227,7 @@ function UserProfile() {
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 text-white relative">
 
-            {/* ═══════════════════════════════════════════
-          🔥 PINK FOLLOW BURST — OPTIMIZED FOR PERFORMANCE
-          ═══════════════════════════════════════════ */}
+      {/* 🔥 FOLLOW BURST OVERLAY */}
       <AnimatePresence>
         {burst && (
           <motion.div
@@ -226,7 +244,6 @@ function UserProfile() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
           >
-            {/* 🔥 Single radial pink blast (replaces 3 rings) */}
             <motion.div
               className="absolute rounded-full"
               style={{
@@ -241,8 +258,6 @@ function UserProfile() {
               animate={{ scale: 12, opacity: 0 }}
               transition={{ duration: 1.1, ease: "easeOut" }}
             />
-
-            {/* 🔥 One accent ring (replaces 2 extra rings) */}
             <motion.div
               className="absolute rounded-full border-2 border-pink-400/70"
               style={{
@@ -255,8 +270,6 @@ function UserProfile() {
               animate={{ scale: 7, opacity: 0 }}
               transition={{ duration: 1.2, ease: "easeOut", delay: 0.08 }}
             />
-
-            {/* 🔥 8 heart particles — no drop-shadow filter (that was the main killer) */}
             {[...Array(8)].map((_, i) => {
               const angle = (i / 8) * Math.PI * 2;
               const distance = 150 + (i % 3) * 50;
@@ -289,8 +302,6 @@ function UserProfile() {
                 </motion.div>
               );
             })}
-
-            {/* 🔥 FOLLOWED text — static gradient (no re-render per frame) */}
             <motion.div
               className="absolute"
               style={{
@@ -342,7 +353,6 @@ function UserProfile() {
                   </span>
                 )}
               </div>
-              {/* 🔥 Private badge */}
               {profileUser.isPrivate && (
                 <div className="absolute -bottom-1 -right-1 w-8 h-8 rounded-lg bg-[#111111] border-2 border-[#111111] flex items-center justify-center">
                   <div className="w-full h-full rounded-lg bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center">
@@ -385,14 +395,6 @@ function UserProfile() {
                         : "bg-gradient-to-r from-pink-600 to-blue-600 hover:from-pink-500 hover:to-blue-500 text-white shadow-[0_0_20px_-5px_rgba(236,72,153,0.5)]"
                     }`}
                   >
-                    {!following && (
-                      <motion.div
-                        className="absolute inset-0 bg-white/30"
-                        initial={{ x: "-100%" }}
-                        whileHover={{ x: "100%" }}
-                        transition={{ duration: 0.6 }}
-                      />
-                    )}
                     <span className="relative z-10 flex items-center justify-center gap-2">
                       <AnimatePresence mode="wait">
                         {following ? (
@@ -471,7 +473,6 @@ function UserProfile() {
         </h2>
       </div>
 
-      {/* 🔥 Private lock / Empty / Grid */}
       {!canSeePosts ? (
         <div className="bg-[#111111] border border-white/5 rounded-2xl p-16 text-center">
           <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-pink-500/20 to-blue-500/20 border border-white/10 flex items-center justify-center mx-auto mb-6">
@@ -505,9 +506,9 @@ function UserProfile() {
           {posts.map((post) => (
             <Link
               key={post.id}
-              to="/feed"
+              to="/reels"
               className="relative group aspect-square bg-[#111111] border border-white/5 rounded-2xl overflow-hidden hover:border-pink-500/30 transition-all"
-            >
+              >
               {post.url ? (
                 post.url.includes(".mp4") || post.url.includes("video") ? (
                   <video src={post.url} className="w-full h-full object-cover" />

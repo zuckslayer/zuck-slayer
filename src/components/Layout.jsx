@@ -7,6 +7,7 @@ import Navbar from "./Navbar";
 function Layout() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
+  const isReels = location.pathname === "/reels";
 
   // Close mobile menu whenever the route changes
   useEffect(() => {
@@ -130,10 +131,14 @@ function Layout() {
       </AnimatePresence>
 
       {/* ═══ MAIN CONTENT ═══ */}
-      <main className="flex-1 md:ml-72 relative min-h-[100dvh] w-full">
-        <div className="max-w-6xl mx-auto p-4 md:p-8">
+            <main className="flex-1 md:ml-72 relative min-h-[100dvh] w-full">
+        {isReels ? (
           <Outlet />
-        </div>
+        ) : (
+          <div className="max-w-6xl mx-auto p-4 md:p-8">
+            <Outlet />
+          </div>
+        )}
       </main>
     </div>
   );

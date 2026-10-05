@@ -171,22 +171,25 @@ function Upload() {
         .filter((u) => u.length > 0);
 
       await addDoc(collection(db, "posts"), {
-        caption: encryptedCaption,
-        url: uploadedUrls[0],
-        mediaUrls: uploadedUrls,
-        mediaType: files[0].type.startsWith("video/") ? "video" : "image",
-        postType,
-        filter: selectedFilter,
-        textOverlays,
-        location: encryptedLocation,
-        hashtags,
-        mentions,
-        taggedUsers: taggedArray,
-        privacy,
-        hideLikes,
-        disableComments,
-        userId: currentUser.uid,
-        createdAt: serverTimestamp(),
+      caption: finalCaption,
+      url: uploadedUrls[0],
+      mediaUrls: uploadedUrls,
+      mediaType: files[0].type.startsWith("video/") ? "video" : "image",
+      postType,
+      filter: selectedFilter,
+      textOverlays,
+      location: encryptedLocation,
+      hashtags,
+      mentions,
+      taggedUsers: taggedArray,
+      privacy,
+      hideLikes,
+      disableComments,
+      userId: currentUser.uid,
+      createdAt: serverTimestamp(),
+      // 🔥 ADD THESE TWO LINES
+      likes: [],
+      likeCount: 0,
       });
 
       setStep(5);

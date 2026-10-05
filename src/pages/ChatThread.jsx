@@ -384,19 +384,57 @@ function ChatThread() {
                         : "bg-white/[0.06] border border-white/10 rounded-bl-sm"
                     }`}
                   >
-                    <p className="text-sm text-white break-words whitespace-pre-wrap leading-relaxed">
-                      {text === undefined ? (
-                        <span className="inline-flex items-center gap-1.5 opacity-60">
-                          <svg className="animate-spin h-3 w-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                          </svg>
-                          decrypting...
-                        </span>
-                      ) : (
-                        text
-                      )}
-                    </p>
+                    {/* 🔥 Shared post card */}
+                    {msg.sharedPost && (
+                  <a
+                    href={`/u/${msg.sharedPost.postOwnerUsername}`}
+                    className="block mb-2 rounded-xl overflow-hidden border border-white/10 bg-black/40 hover:border-pink-500/50 transition-all"
+                    style={{ minWidth: 220, maxWidth: 260 }}
+                  >
+                    {msg.sharedPost.postUrl && (
+                  <div className="aspect-square bg-black">
+                    {msg.sharedPost.postUrl.includes(".mp4") ||
+                    msg.sharedPost.postUrl.includes("video") ? (
+                  <video
+                    src={msg.sharedPost.postUrl}
+                    className="w-full h-full object-cover"
+                    muted
+                  />
+                  ) : (
+                  <img
+                    src={msg.sharedPost.postUrl}
+                    alt=""
+                    className="w-full h-full object-cover"
+                  />
+                  )}
+                  </div>
+                  )}
+                  <div className="p-2.5">
+                  <p className="text-[10px] text-pink-400 font-bold truncate">
+                    @{msg.sharedPost.postOwnerUsername}
+                  </p>
+                    {msg.sharedPost.postCaption && (
+                  <p className="text-[11px] text-gray-300 line-clamp-2 mt-0.5">
+                    {msg.sharedPost.postCaption}
+                  </p>
+                  )}
+                  </div>
+                  </a>
+                )}
+
+                  <p className="text-sm text-white break-words whitespace-pre-wrap leading-relaxed">
+                  {text === undefined ? (
+                  <span className="inline-flex items-center gap-1.5 opacity-60">
+                  <svg className="animate-spin h-3 w-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                  decrypting...
+                </span>
+                ) : (
+                  text
+                )}
+                  </p>
                     <p className={`text-[10px] mt-1 font-mono ${
                       isMe ? "text-white/90 text-right" : "text-gray-500"
                     }`}>

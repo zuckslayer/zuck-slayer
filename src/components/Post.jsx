@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { db } from "../firebase";
 import {
   doc,
@@ -8,11 +8,17 @@ import {
   serverTimestamp,
   getDoc,
   deleteDoc,
-  runTransaction,
+  updateDoc,
+  arrayUnion,
+  arrayRemove,
+  increment,
+  setDoc,            
 } from "firebase/firestore";
 import { useAuth } from "../context/AuthContext";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import { createNotification } from "../utils/notifications";
+import ShareModal from "./ShareModal";
 
 const FILTER_CSS = {
   original: "none",
@@ -51,12 +57,16 @@ function Post({
   const [likeCount, setLikeCount] = useState(0);
   const [authorUsername, setAuthorUsername] = useState("");
   const [authorPhoto, setAuthorPhoto] = useState("");
+  const [myUsername, setMyUsername] = useState("");
   const [showComments, setShowComments] = useState(false);
   const [currentMedia, setCurrentMedia] = useState(0);
   const [burst, setBurst] = useState(false);
   const [heartPop, setHeartPop] = useState(false);
   const [lastTap, setLastTap] = useState(0);
   const [captionExpanded, setCaptionExpanded] = useState(false);
+  const [isSaved, setIsSaved] = useState(false); // 🔥 NEW
+  const likeInFlight = useRef(false);
+  const [showShare, setShowShare] = useState(false);
 
   const allMedia = mediaUrls && mediaUrls.length > 0 ? mediaUrls : url ? [url] : [];
   const mediaFilter = FILTER_CSS[filter] || "none";
@@ -66,7 +76,9 @@ function Post({
   const isLiked = currentUser && likes.includes(currentUser.uid);
   const isLongCaption = caption && caption.length > 120;
 
-  // Fetch author info
+  // ─────────────────────────────────────
+  // FETCH AUTHOR INFO
+  // ─────────────────────────────────────
   useEffect(() => {
     if (!userId) return;
     getDoc(doc(db, "users", userId)).then((snap) => {
@@ -77,7 +89,19 @@ function Post({
     });
   }, [userId]);
 
-  // Realtime likes + comments
+  // ─────────────────────────────────────
+  // FETCH OWN USERNAME
+  // ─────────────────────────────────────
+  useEffect(() => {
+    if (!currentUser) return;
+    getDoc(doc(db, "users", currentUser.uid)).then((snap) => {
+      if (snap.exists()) setMyUsername(snap.data().username || "user");
+    });
+  }, [currentUser]);
+
+  // ─────────────────────────────────────
+  // REALTIME LIKES + COMMENTS + SAVE STATE
+  // ─────────────────────────────────────
   useEffect(() => {
     const postRef = doc(db, "posts", postId);
     const commentsRef = collection(db, "posts", postId, "comments");
@@ -86,6 +110,7 @@ function Post({
       if (snap.exists()) {
         const data = snap.data();
         const safeLikes = Array.isArray(data.likes) ? data.likes : [];
+        if (likeInFlight.current) return;
         setLikes(safeLikes);
         setLikeCount(data.likeCount || safeLikes.length);
       }
@@ -107,77 +132,156 @@ function Post({
       setComments(docs);
     });
 
+    // 🔥 NEW: Subscribe to save state
+    let unsubSave = () => {};
+    if (currentUser) {
+      const saveRef = doc(db, "users", currentUser.uid, "saved", postId);
+      unsubSave = onSnapshot(
+        saveRef,
+        (snap) => setIsSaved(snap.exists()),
+        () => setIsSaved(false)
+      );
+    }
+
     return () => {
       unsubLikes();
       unsubComments();
+      unsubSave();
     };
-  }, [postId]);
+  }, [postId, currentUser]);
 
+  // ─────────────────────────────────────
+  // LIKE
+  // ─────────────────────────────────────
   const doLike = async () => {
-    if (!isAuthenticated) return;
-    const postRef = doc(db, "posts", postId);
+    if (!isAuthenticated || !currentUser) return;
+    if (likeInFlight.current) return;
+    likeInFlight.current = true;
 
-    if (!isLiked) {
+    const postRef = doc(db, "posts", postId);
+    const wasLiked = likes.includes(currentUser.uid);
+    const prevLikes = [...likes];
+    const prevCount = likeCount;
+
+    if (wasLiked) {
+      setLikes(prevLikes.filter((id) => id !== currentUser.uid));
+      setLikeCount(Math.max(0, prevCount - 1));
+    } else {
+      setLikes([...prevLikes, currentUser.uid]);
+      setLikeCount(prevCount + 1);
       setBurst(true);
       setTimeout(() => setBurst(false), 900);
     }
 
     try {
-      await runTransaction(db, async (transaction) => {
-        const postDoc = await transaction.get(postRef);
-        if (!postDoc.exists()) throw "Post missing";
-        const postData = postDoc.data();
-        const currentLikes = Array.isArray(postData.likes) ? postData.likes : [];
-        const alreadyLiked = currentLikes.includes(currentUser.uid);
-        const newLikes = alreadyLiked
-          ? currentLikes.filter((id) => id !== currentUser.uid)
-          : [...currentLikes, currentUser.uid];
-
-        transaction.update(postRef, {
-          likes: newLikes,
-          likeCount: newLikes.length,
-        });
+      await updateDoc(postRef, {
+        likes: wasLiked ? arrayRemove(currentUser.uid) : arrayUnion(currentUser.uid),
+        likeCount: increment(wasLiked ? -1 : 1),
       });
+
+      if (!wasLiked) {
+        createNotification({
+          recipientId: userId,
+          actorId: currentUser.uid,
+          actorUsername: myUsername,
+          actorPhoto: "",
+          type: "like",
+          postId,
+          postPreviewUrl: allMedia[0] || "",
+        });
+      }
+
+      setTimeout(() => {
+        likeInFlight.current = false;
+      }, 400);
     } catch (err) {
-      console.error("Like failed", err);
+      console.error("Like failed:", err);
+      setLikes(prevLikes);
+      setLikeCount(prevCount);
+      likeInFlight.current = false;
     }
   };
 
+  // ─────────────────────────────────────
+  // DOUBLE-TAP ON MEDIA
+  // ─────────────────────────────────────
   const handleMediaTap = () => {
     const now = Date.now();
     if (now - lastTap < 300) {
-      // 🔥 Double tap detected
-      if (!isLiked && isAuthenticated) {
-        doLike();
-      }
+      if (!isLiked && isAuthenticated) doLike();
       setHeartPop(true);
       setTimeout(() => setHeartPop(false), 1000);
     }
     setLastTap(now);
   };
 
+  // ─────────────────────────────────────
+  // COMMENTS
+  // ─────────────────────────────────────
   const handleComment = async (e) => {
     e.preventDefault();
     if (disableComments) return;
     if (!commentInput.trim() || !isAuthenticated) return;
+
+    const text = commentInput.trim();
+    setCommentInput("");
+
     const commentsRef = collection(db, "posts", postId, "comments");
     await addDoc(commentsRef, {
-      text: commentInput,
+      text,
       userId: currentUser.uid,
       createdAt: serverTimestamp(),
     });
-    setCommentInput("");
+
+    createNotification({
+      recipientId: userId,
+      actorId: currentUser.uid,
+      actorUsername: myUsername,
+      actorPhoto: "",
+      type: "comment",
+      postId,
+      postPreviewUrl: allMedia[0] || "",
+      text: text.slice(0, 100),
+    });
   };
 
   const handleDeleteComment = async (commentId) => {
     await deleteDoc(doc(db, "posts", postId, "comments", commentId));
   };
 
+  // ─────────────────────────────────────
+  // 🔥 NEW: SAVE / UNSAVE
+  // ─────────────────────────────────────
+  const handleSave = async () => {
+    if (!currentUser) return;
+    const saveRef = doc(db, "users", currentUser.uid, "saved", postId);
+
+    const wasSaved = isSaved;
+    setIsSaved(!wasSaved);
+
+    try {
+      if (wasSaved) {
+        await deleteDoc(saveRef);
+      } else {
+        await setDoc(saveRef, {
+          postId,
+          savedAt: serverTimestamp(),
+          savedAtMs: Date.now(),
+          postUrl: allMedia[0] || "",
+          postCaption: caption || "",
+          postOwnerId: userId,
+          postOwnerUsername: authorUsername,
+        });
+      }
+    } catch (err) {
+      console.error("Save failed:", err);
+      setIsSaved(wasSaved);
+    }
+  };
+
   return (
     <article className="w-full max-w-2xl mx-auto mb-12 group">
-      {/* ═══════════════════════════════════════ */}
-      {/* MEDIA STAGE                               */}
-      {/* ═══════════════════════════════════════ */}
+      {/* ═══ MEDIA STAGE ═══ */}
       <div className="relative bg-black rounded-3xl overflow-hidden border border-white/5">
         {/* Media with 4:5 aspect */}
         {hasValidMedia ? (
@@ -216,12 +320,7 @@ function Post({
                 className="absolute pointer-events-none"
                 style={{
                   color: t.color,
-                  fontSize:
-                    t.size === "small"
-                      ? "1.2rem"
-                      : t.size === "large"
-                      ? "2.5rem"
-                      : "1.8rem",
+                  fontSize: t.size === "small" ? "1.2rem" : t.size === "large" ? "2.5rem" : "1.8rem",
                   fontWeight: 900,
                   textShadow: "0 2px 10px rgba(0,0,0,0.9)",
                   top: `${20 + i * 12}%`,
@@ -357,9 +456,9 @@ function Post({
               </>
             )}
 
-            {/* 🔥 Floating Action Bar (bottom) */}
+            {/* ═══ ACTION BAR ═══ */}
             <div className="absolute bottom-4 left-4 right-4 z-20 flex items-center justify-between gap-2">
-              {/* Left cluster: Like + Comment */}
+              {/* Left: Like + Comment */}
               <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-full bg-black/50 backdrop-blur-xl border border-white/15">
                 <motion.button
                   onClick={(e) => {
@@ -427,18 +526,10 @@ function Post({
                   }}
                   disabled={disableComments}
                   className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold transition-colors ${
-                    disableComments
-                      ? "text-gray-600 cursor-not-allowed"
-                      : "text-white hover:text-pink-400"
+                    disableComments ? "text-gray-600 cursor-not-allowed" : "text-white hover:text-pink-400"
                   }`}
                 >
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    className="w-4 h-4"
-                  >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
                     <path
                       d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
                       strokeLinecap="round"
@@ -449,48 +540,57 @@ function Post({
                 </button>
               </div>
 
-              {/* Right cluster: Share */}
-              <button
-                onClick={(e) => e.stopPropagation()}
-                className="w-9 h-9 rounded-full bg-black/50 backdrop-blur-xl border border-white/15 flex items-center justify-center text-white hover:text-pink-400 hover:border-pink-500/50 transition-all"
-              >
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  className="w-4 h-4"
+              <div className="flex items-center gap-1.5">
+                {/* Bookmark */}
+                <motion.button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleSave();
+                  }}
+                  whileTap={{ scale: 0.85 }}
+                  className={`w-9 h-9 rounded-full bg-black/50 backdrop-blur-xl border flex items-center justify-center transition-all ${
+                    isSaved
+                      ? "border-pink-500/60 text-pink-400"
+                      : "border-white/15 text-white hover:text-pink-400 hover:border-pink-500/50"
+                  }`}
                 >
-                  <path
-                    d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
+                  <motion.svg
+                    key={isSaved ? "saved" : "unsaved"}
+                    initial={{ scale: 0.6 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: "spring", stiffness: 500, damping: 15 }}
+                    viewBox="0 0 24 24"
+                    fill={isSaved ? "currentColor" : "none"}
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    className="w-4 h-4"
+                  >
+                    <path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" strokeLinecap="round" strokeLinejoin="round" />
+                  </motion.svg>
+                </motion.button>
+
+                {/* Share */}
+                <button
+                  onClick={(e) => {
+                  e.stopPropagation();
+                  setShowShare(true);
+                  }}
+                  className="w-9 h-9 rounded-full bg-black/50 backdrop-blur-xl border border-white/15 flex items-center justify-center text-white hover:text-pink-400 hover:border-pink-500/50 transition-all"
+                  >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
+                  <path d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </button>
+              </div>
             </div>
 
             {/* Location badge */}
             {location && (
               <div className="absolute top-14 left-14 z-20 px-2.5 py-1 rounded-full bg-black/50 backdrop-blur-xl border border-white/15">
                 <span className="text-[10px] font-mono text-white/90 flex items-center gap-1">
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    className="w-3 h-3"
-                  >
-                    <path
-                      d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                    <path
-                      d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3 h-3">
+                    <path d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                   {location}
                 </span>
@@ -504,9 +604,7 @@ function Post({
         )}
       </div>
 
-      {/* ═══════════════════════════════════════ */}
-      {/* CAPTION PANEL                             */}
-      {/* ═══════════════════════════════════════ */}
+      {/* CAPTION */}
       {caption && (
         <div className="px-2 pt-4 pb-2">
           <p
@@ -586,7 +684,10 @@ function Post({
                   </p>
                 )}
                 {comments.map((c) => (
-                  <div key={c.id} className="flex justify-between items-start text-xs gap-3 group/comment">
+                  <div
+                    key={c.id}
+                    className="flex justify-between items-start text-xs gap-3 group/comment"
+                  >
                     <div className="flex-1 flex items-start gap-2">
                       <div className="w-6 h-6 rounded-full bg-gradient-to-br from-pink-500 via-purple-500 to-blue-600 flex items-center justify-center shrink-0">
                         <span className="text-[9px] font-black text-white">
@@ -616,6 +717,22 @@ function Post({
               </div>
             </div>
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* SHARE MODAL */}
+      <AnimatePresence>
+        {showShare && (
+          <ShareModal
+            post={{
+              postId,
+              url,
+              caption,
+              mediaUrls,
+              authorUsername,
+            }}
+            onClose={() => setShowShare(false)}
+          />
         )}
       </AnimatePresence>
     </article>

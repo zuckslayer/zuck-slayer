@@ -1,3 +1,4 @@
+// src/components/Navbar.jsx
 import { NavLink, Link, useNavigate } from "react-router-dom";
 import { signOut } from "firebase/auth";
 import { auth, db } from "../firebase";
@@ -7,43 +8,138 @@ import { collection, query, where, onSnapshot } from "firebase/firestore";
 
 // 🔥 Professional SVG Icon Components
 const Icons = {
-  Home: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" strokeLinecap="round" strokeLinejoin="round"/></svg>,
-  Feed: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5"><path d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" strokeLinecap="round" strokeLinejoin="round"/><path d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z" strokeLinecap="round" strokeLinejoin="round"/></svg>,
-  Chats: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5"><path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" strokeLinecap="round" strokeLinejoin="round"/></svg>,
-  Upload: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" strokeLinecap="round" strokeLinejoin="round"/></svg>,
-  Profile: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" strokeLinecap="round" strokeLinejoin="round"/></svg>,
-  Login: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5"><path d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" strokeLinecap="round" strokeLinejoin="round"/></svg>,
-  Logout: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" strokeLinecap="round" strokeLinejoin="round"/></svg>,
+  Home: () => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5">
+      <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  ),
+    Search: () => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5">
+      <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  ),
+  Explore: () => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5">
+      <path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M15.9 8.1l-2.9 6.8-6.8 2.9 2.9-6.8 6.8-2.9z" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  ),
+    Saved: () => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5">
+      <path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  ),
+  Notifications: () => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5">
+      <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  ),
+  Feed: () => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5">
+      <path d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  ),
+  Chats: () => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5">
+      <path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  ),
+  Upload: () => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5">
+      <path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  ),
+  Profile: () => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5">
+      <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  ),
+  Login: () => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5">
+      <path d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  ),
+  Logout: () => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5">
+      <path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  ),
 };
 
 function Navbar() {
   const { currentUser, userProfile } = useAuth();
   const navigate = useNavigate();
   const [hasUnread, setHasUnread] = useState(false);
+  const [hasNotifications, setHasNotifications] = useState(false);
 
-  // 🔥 Listen for unread messages across all conversations
+  // 🔥 Unread chats
   useEffect(() => {
     if (!currentUser) {
       setHasUnread(false);
       return;
     }
 
-    const q = query(
-      collection(db, "conversations"),
-      where("participants", "array-contains", currentUser.uid)
-    );
+    let unsub = () => {};
+    try {
+      const q = query(
+        collection(db, "conversations"),
+        where("participants", "array-contains", currentUser.uid)
+      );
+      unsub = onSnapshot(
+        q,
+        (snap) => {
+          const anyUnread = snap.docs.some((d) => {
+            const data = d.data();
+            if (!data.lastMessageAt && !data.lastMessageAtMs) return false;
+            if (data.lastMessageSenderId === currentUser.uid) return false;
+            const lastMsg = data.lastMessageAtMs || 0;
+            const lastRead = data.lastReadAtMs?.[currentUser.uid] || 0;
+            return lastMsg > lastRead;
+          });
+          setHasUnread(anyUnread);
+        },
+        (error) => {
+          // 🔥 Silently swallow errors so Navbar never crashes
+          console.warn("Chats listener error:", error);
+          setHasUnread(false);
+        }
+      );
+    } catch (err) {
+      console.warn("Chats listener setup failed:", err);
+    }
 
-    const unsub = onSnapshot(q, (snap) => {
-      const anyUnread = snap.docs.some((d) => {
-      const data = d.data();
-        if (data.lastMessageSenderId === currentUser.uid) return false;
-        // 🔥 Use client-side ms timestamp for instant detection
-      const lastMsg = data.lastMessageAtMs || 0;
-      const lastRead = data.lastReadAtMs?.[currentUser.uid] || 0;
-      return lastMsg > lastRead;
-    });
-      setHasUnread(anyUnread);
-    });
+    return () => unsub();
+  }, [currentUser]);
+
+  // 🔥 Unread notifications
+  useEffect(() => {
+    if (!currentUser) {
+      setHasNotifications(false);
+      return;
+    }
+
+    let unsub = () => {};
+    try {
+      const q = query(
+        collection(db, "notifications"),
+        where("recipientId", "==", currentUser.uid)
+      );
+      unsub = onSnapshot(
+        q,
+        (snap) => {
+          const anyUnread = snap.docs.some((d) => !d.data().read);
+          setHasNotifications(anyUnread);
+        },
+        (error) => {
+          // 🔥 Silently swallow permission errors
+          console.warn("Notifications listener error:", error);
+          setHasNotifications(false);
+        }
+      );
+    } catch (err) {
+      console.warn("Notifications listener setup failed:", err);
+    }
 
     return () => unsub();
   }, [currentUser]);
@@ -62,19 +158,40 @@ function Navbar() {
 
   return (
     <div className="flex flex-col h-full">
-      {/* Main Navigation */}
       <div className="space-y-1.5">
         <NavLink to="/" className={linkClass}>
           <div className="absolute inset-0 bg-gradient-to-r from-pink-500/0 via-pink-500/5 to-purple-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-out" />
           <Icons.Home /> <span className="relative z-10">Home</span>
         </NavLink>
 
-        <NavLink to="/feed" className={linkClass}>
+        <NavLink to="/notifications" className={linkClass}>
           <div className="absolute inset-0 bg-gradient-to-r from-pink-500/0 via-pink-500/5 to-purple-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-out" />
-          <Icons.Feed /> <span className="relative z-10">The Chaos Feed</span>
+          <Icons.Notifications /> <span className="relative z-10">Notifications</span>
+          {hasNotifications && (
+            <span className="ml-auto w-2 h-2 rounded-full bg-pink-500 shadow-[0_0_12px_rgba(236,72,153,0.9)] animate-pulse relative z-10"></span>
+          )}
         </NavLink>
 
-        {/* 🔥 Messages with pink unread dot */}
+        <NavLink to="/search" className={linkClass}>
+          <div className="absolute inset-0 bg-gradient-to-r from-pink-500/0 via-pink-500/5 to-purple-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-out" />
+          <Icons.Search /> <span className="relative z-10">Search</span>
+        </NavLink>
+
+        <NavLink to="/explore" className={linkClass}>
+          <div className="absolute inset-0 bg-gradient-to-r from-pink-500/0 via-pink-500/5 to-purple-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-out" />
+          <Icons.Explore /> <span className="relative z-10">Explore</span>
+        </NavLink>
+
+        <NavLink to="/saved" className={linkClass}>
+          <div className="absolute inset-0 bg-gradient-to-r from-pink-500/0 via-pink-500/5 to-purple-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-out" />
+          <Icons.Saved /> <span className="relative z-10">Saved</span>
+        </NavLink>
+
+        <NavLink to="/reels" className={linkClass}>
+          <div className="absolute inset-0 bg-gradient-to-r from-pink-500/0 via-pink-500/5 to-purple-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-out" />
+          <Icons.Feed /> <span className="relative z-10">Reels</span>
+        </NavLink>
+
         <NavLink to="/chats" className={linkClass}>
           <div className="absolute inset-0 bg-gradient-to-r from-pink-500/0 via-pink-500/5 to-purple-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-out" />
           <Icons.Chats /> <span className="relative z-10">Messages</span>
@@ -86,7 +203,9 @@ function Navbar() {
         {currentUser && (
           <>
             <div className="pt-6 pb-2">
-              <p className="px-4 text-[10px] font-bold text-gray-600 uppercase tracking-widest">Creator Tools</p>
+              <p className="px-4 text-[10px] font-bold text-gray-600 uppercase tracking-widest">
+                Creator Tools
+              </p>
             </div>
             <NavLink to="/upload" className={linkClass}>
               <div className="absolute inset-0 bg-gradient-to-r from-pink-500/0 via-pink-500/5 to-purple-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-out" />
@@ -100,14 +219,16 @@ function Navbar() {
         )}
       </div>
 
-      {/* Bottom Section (Auth) */}
       <div className="mt-auto pt-8 pb-4 border-t border-white/5">
         {!currentUser ? (
           <div className="space-y-2">
             <NavLink to="/login" className={linkClass}>
               <Icons.Login /> <span className="relative z-10">Login</span>
             </NavLink>
-            <NavLink to="/signup" className="flex items-center justify-center gap-2 w-full bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white font-bold py-3 px-4 rounded-xl shadow-[0_0_20px_-5px_rgba(236,72,153,0.4)] hover:shadow-[0_0_30px_-5px_rgba(236,72,153,0.6)] transition-all duration-300 transform hover:scale-[1.02] active:scale-95">
+            <NavLink
+              to="/signup"
+              className="flex items-center justify-center gap-2 w-full bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white font-bold py-3 px-4 rounded-xl shadow-[0_0_20px_-5px_rgba(236,72,153,0.4)] hover:shadow-[0_0_30px_-5px_rgba(236,72,153,0.6)] transition-all duration-300 transform hover:scale-[1.02] active:scale-95"
+            >
               Sign Up Free
             </NavLink>
           </div>
@@ -127,8 +248,12 @@ function Navbar() {
                 )}
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-xs text-white font-bold truncate">@{userProfile?.username || "user"}</p>
-                <p className="text-[10px] text-gray-500 font-mono truncate">{currentUser.email}</p>
+                <p className="text-xs text-white font-bold truncate">
+                  @{userProfile?.username || "user"}
+                </p>
+                <p className="text-[10px] text-gray-500 font-mono truncate">
+                  {currentUser.email}
+                </p>
               </div>
             </Link>
 
