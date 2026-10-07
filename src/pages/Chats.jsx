@@ -127,7 +127,7 @@ function Chats() {
         </div>
         <button
           onClick={() => setShowNewChat(true)}
-          className="bg-gradient-to-r from-pink-600 to-blue-600 hover:from-pink-500 hover:to-blue-500 text-white font-bold text-sm py-2.5 px-4 rounded-xl shadow-[0_0_20px_-5px_rgba(236,72,153,0.5)] transition-all flex items-center gap-2"
+          className="bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white font-bold text-sm py-2.5 px-4 rounded-xl shadow-[0_0_20px_-5px_rgba(236,72,153,0.5)] transition-all flex items-center gap-2"
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4">
             <path d="M12 4v16m8-8H4" strokeLinecap="round" strokeLinejoin="round" />
@@ -156,7 +156,7 @@ function Chats() {
           </p>
           <button
             onClick={() => setShowNewChat(true)}
-            className="inline-block bg-gradient-to-r from-pink-600 to-blue-600 hover:from-pink-500 hover:to-blue-500 text-white font-bold py-3 px-8 rounded-xl shadow-lg transition-all"
+            className="inline-block bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white font-bold py-3 px-8 rounded-xl shadow-lg transition-all"
           >
             Start a Chat
           </button>
@@ -178,7 +178,7 @@ function Chats() {
                 }`}
               >
                 <div className="relative shrink-0">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-pink-500 via-purple-500 to-blue-600 flex items-center justify-center overflow-hidden">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-pink-500 via-purple-500 to-purple-700 flex items-center justify-center overflow-hidden">
                     {other.photoURL ? (
                       <img src={other.photoURL} alt="" className="w-full h-full object-cover" />
                     ) : (
@@ -385,7 +385,8 @@ function NewChatModal({ onClose, currentUser, userProfile }) {
               onClick={() => startChat(user)}
               className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-white/[0.05] transition-all text-left"
             >
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-pink-500 via-purple-500 to-blue-600 flex items-center justify-center overflow-hidden shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-pink-500 via-purple-500 to-purple-700
+               flex items-center justify-center overflow-hidden shrink-0">
                 {user.photoURL ? (
                   <img src={user.photoURL} alt="" className="w-full h-full object-cover" />
                 ) : (

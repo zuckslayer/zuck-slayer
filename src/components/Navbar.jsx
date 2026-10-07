@@ -238,7 +238,7 @@ function Navbar() {
               to="/profile"
               className="flex items-center gap-3 px-3 py-3 bg-white/[0.02] rounded-xl border border-white/5 mb-4 hover:border-pink-500/30 transition-all group"
             >
-              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-pink-500 via-purple-500 to-blue-600 flex items-center justify-center overflow-hidden shrink-0">
+              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-pink-500 via-purple-500 to-purple-700 flex items-center justify-center overflow-hidden shrink-0">
                 {userProfile?.photoURL ? (
                   <img src={userProfile.photoURL} alt="Profile" className="w-full h-full object-cover" />
                 ) : (

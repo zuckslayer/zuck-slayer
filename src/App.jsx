@@ -18,6 +18,7 @@ import Search from "./pages/Search";
 import Explore from "./pages/Explore";
 import Saved from "./pages/Saved";
 import Reels from "./pages/Reels";
+import StoryViewer from "./components/StoryViewer";
 import UserProfile from "./pages/UserProfile";
 import Chats from "./pages/Chats";
 import ChatThread from "./pages/ChatThread";
@@ -49,6 +50,7 @@ function App() {
           <Route path="/explore" element={<PrivateRoute><Explore /></PrivateRoute>} />
           <Route path="/saved" element={<PrivateRoute><Saved /></PrivateRoute>} />
           <Route path="/reels" element={<PrivateRoute><Reels /></PrivateRoute>} />
+          <Route path="/stories" element={<PrivateRoute><StoryViewer /></PrivateRoute>} />
           <Route path="/upload" element={<PrivateRoute><Upload /></PrivateRoute>} />
           <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
           <Route path="/edit-profile" element={<PrivateRoute><EditProfile /></PrivateRoute>} />

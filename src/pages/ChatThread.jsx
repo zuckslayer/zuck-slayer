@@ -323,7 +323,7 @@ function ChatThread() {
           to={`/u/${otherUser?.username || ""}`}
           className="flex items-center gap-3 flex-1 min-w-0 group"
         >
-          <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-pink-500 via-purple-500 to-blue-600 flex items-center justify-center overflow-hidden shrink-0 group-hover:scale-105 transition-transform">
+          <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-pink-500 via-purple-500 to-purple-700 flex items-center justify-center overflow-hidden shrink-0 group-hover:scale-105 transition-transform">
             {otherUser?.photoURL ? (
               <img src={otherUser.photoURL} alt="" className="w-full h-full object-cover" />
             ) : (
@@ -471,7 +471,7 @@ function ChatThread() {
           <button
             type="submit"
             disabled={!input.trim() || sending}
-            className="w-12 h-12 rounded-xl bg-gradient-to-r from-pink-600 to-blue-600 hover:from-pink-500 hover:to-blue-500 flex items-center justify-center text-white shadow-[0_0_20px_-5px_rgba(236,72,153,0.5)] transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100 shrink-0"
+            className="w-12 h-12 rounded-xl bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 flex items-center justify-center text-white shadow-[0_0_20px_-5px_rgba(236,72,153,0.5)] transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100 shrink-0"
           >
             {sending ? (
               <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">

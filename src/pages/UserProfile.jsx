@@ -316,7 +316,7 @@ function UserProfile() {
               }}
               transition={{ duration: 1.3, times: [0, 0.3, 1], ease: "easeOut" }}
             >
-              <p className="text-3xl md:text-5xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500">
+              <p className="text-3xl md:text-5xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-pink-500">
                 FOLLOWED
               </p>
             </motion.div>

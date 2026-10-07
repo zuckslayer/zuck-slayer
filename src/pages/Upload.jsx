@@ -1,3 +1,4 @@
+// src/pages/Upload.jsx
 import { useState, useRef } from "react";
 import axios from "axios";
 import { db } from "../firebase";
@@ -41,7 +42,7 @@ function Upload() {
   const fileInputRef = useRef(null);
 
   // Wizard state
-  const [step, setStep] = useState(1); // 1: Media, 2: Enhance, 3: Details, 4: Uploading, 5: Done
+  const [step, setStep] = useState(1);
   const [postType, setPostType] = useState("post");
 
   // Media
@@ -55,7 +56,7 @@ function Upload() {
   // Enhance
   const [activeEnhanceTab, setActiveEnhanceTab] = useState("filters");
   const [selectedFilter, setSelectedFilter] = useState("original");
-  const [textOverlays, setTextOverlays] = useState([]); // [{ text, color, size }]
+  const [textOverlays, setTextOverlays] = useState([]);
   const [newText, setNewText] = useState("");
   const [textColor, setTextColor] = useState("#ffffff");
   const [textSize, setTextSize] = useState("medium");
@@ -151,12 +152,10 @@ function Upload() {
         uploadedUrls.push(res.data.secure_url);
       }
 
-      // Encrypt the caption
-      const encryptedCaption = caption.trim()
-        ? await encryptMessage(caption.trim(), encryptionKey)
-        : "";
+      // 🔥 Captions are public — no encryption
+      const finalCaption = caption.trim();
 
-      // Encrypt the location
+      // Location is private — keep it encrypted
       const encryptedLocation = location.trim()
         ? await encryptMessage(location.trim(), encryptionKey)
         : "";
@@ -170,30 +169,41 @@ function Upload() {
         .map((u) => u.trim().replace(/^@/, "").toLowerCase())
         .filter((u) => u.length > 0);
 
-      await addDoc(collection(db, "posts"), {
-      caption: finalCaption,
-      url: uploadedUrls[0],
-      mediaUrls: uploadedUrls,
-      mediaType: files[0].type.startsWith("video/") ? "video" : "image",
-      postType,
-      filter: selectedFilter,
-      textOverlays,
-      location: encryptedLocation,
-      hashtags,
-      mentions,
-      taggedUsers: taggedArray,
-      privacy,
-      hideLikes,
-      disableComments,
-      userId: currentUser.uid,
-      createdAt: serverTimestamp(),
-      // 🔥 ADD THESE TWO LINES
-      likes: [],
-      likeCount: 0,
-      });
+      // 🔥 Route stories to a separate collection with 24h expiry
+      const isStory = postType === "story";
+      const targetCollection = isStory ? "stories" : "posts";
 
+      const payload = {
+        caption: finalCaption,
+        url: uploadedUrls[0],
+        mediaUrls: uploadedUrls,
+        mediaType: files[0].type.startsWith("video/") ? "video" : "image",
+        postType,
+        filter: selectedFilter,
+        textOverlays,
+        location: encryptedLocation,
+        hashtags,
+        mentions,
+        taggedUsers: taggedArray,
+        privacy,
+        hideLikes,
+        disableComments,
+        userId: currentUser.uid,
+        createdAt: serverTimestamp(),
+        createdAtMs: Date.now(),
+        likes: [],
+        likeCount: 0,
+      };
+
+      // Stories expire after 24 hours
+      if (isStory) {
+        payload.expiresAtMs = Date.now() + 24 * 60 * 60 * 1000;
+        payload.viewers = [];
+      }
+
+      await addDoc(collection(db, targetCollection), payload);
       setStep(5);
-      setTimeout(() => navigate("/profile"), 2200);
+      setTimeout(() => navigate(isStory ? "/" : "/profile"), 2200);
     } catch (err) {
       console.error("Upload failed", err);
       setError("Upload failed. Try again.");
@@ -349,7 +359,6 @@ function Upload() {
                     )}
                   </div>
 
-                  {/* Remove button */}
                   <button
                     onClick={() => removeFile(currentPreview)}
                     className="absolute top-4 right-4 w-10 h-10 rounded-xl bg-black/70 backdrop-blur border border-white/20 hover:border-red-500/50 hover:bg-red-500/20 flex items-center justify-center transition-all"
@@ -359,7 +368,6 @@ function Upload() {
                     </svg>
                   </button>
 
-                  {/* Prev / Next */}
                   {files.length > 1 && (
                     <>
                       <button
@@ -375,7 +383,6 @@ function Upload() {
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5 text-white"><path d="M9 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" /></svg>
                       </button>
 
-                      {/* Counter */}
                       <div className="absolute top-4 left-4 px-3 py-1 rounded-lg bg-black/70 backdrop-blur border border-white/20 text-xs font-mono text-white">
                         {currentPreview + 1} / {files.length}
                       </div>
@@ -383,7 +390,6 @@ function Upload() {
                   )}
                 </div>
 
-                {/* Thumbnail Strip */}
                 {files.length > 1 && (
                   <div className="flex gap-2 overflow-x-auto pb-2">
                     {previews.map((p, i) => (
@@ -430,11 +436,10 @@ function Upload() {
               </div>
             )}
 
-            {/* Next */}
             {files.length > 0 && (
               <button
                 onClick={() => setStep(2)}
-                className="w-full py-4 rounded-xl bg-gradient-to-r from-pink-600 via-purple-600 to-blue-600 hover:from-pink-500 hover:via-purple-500 hover:to-blue-500 text-white font-bold tracking-wide shadow-[0_0_30px_-10px_rgba(236,72,153,0.6)] transition-all transform hover:scale-[1.02]"
+                className="w-full py-4 rounded-xl bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:via-purple-500 hover:to-blue-500 text-white font-bold tracking-wide shadow-[0_0_30px_-10px_rgba(236,72,153,0.6)] transition-all transform hover:scale-[1.02]"
               >
                 Next: Enhance
               </button>
@@ -448,7 +453,6 @@ function Upload() {
         {step === 2 && (
           <motion.div key="step2" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-6">
             
-            {/* Preview with Filter Applied */}
             <div className="relative bg-black rounded-3xl overflow-hidden border border-white/10">
               <div className="aspect-square md:aspect-video flex items-center justify-center bg-black">
                 {files[currentPreview]?.type.startsWith("video/") ? (
@@ -456,7 +460,6 @@ function Upload() {
                 ) : (
                   <div className="relative w-full h-full flex items-center justify-center">
                     <img src={previews[currentPreview]} alt="Preview" className="w-full h-full object-contain" style={{ filter: getActiveFilterCSS() }} />
-                    {/* Text Overlays */}
                     {textOverlays.map((t, i) => (
                       <div
                         key={i}
@@ -481,7 +484,6 @@ function Upload() {
               </div>
             </div>
 
-            {/* Enhance Tabs */}
             <div className="flex gap-2 overflow-x-auto pb-1">
               {[
                 { id: "filters", label: "Filters" },
@@ -503,7 +505,6 @@ function Upload() {
               ))}
             </div>
 
-            {/* Tab Content */}
             <div className="bg-[#111111] border border-white/5 rounded-3xl p-5">
               {activeEnhanceTab === "filters" && (
                 <div>
@@ -619,7 +620,6 @@ function Upload() {
               )}
             </div>
 
-            {/* Navigation */}
             <div className="flex gap-3">
               <button
                 onClick={() => setStep(1)}
@@ -629,7 +629,7 @@ function Upload() {
               </button>
               <button
                 onClick={() => setStep(3)}
-                className="flex-1 py-4 rounded-xl bg-gradient-to-r from-pink-600 via-purple-600 to-blue-600 hover:from-pink-500 hover:via-purple-500 hover:to-blue-500 text-white font-bold tracking-wide shadow-[0_0_30px_-10px_rgba(236,72,153,0.6)] transition-all transform hover:scale-[1.02]"
+                className="flex-1 py-4 rounded-xl bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:via-purple-500 hover:to-blue-500 text-white font-bold tracking-wide shadow-[0_0_30px_-10px_rgba(236,72,153,0.6)] transition-all transform hover:scale-[1.02]"
               >
                 Next: Details
               </button>
@@ -643,7 +643,6 @@ function Upload() {
         {step === 3 && (
           <motion.div key="step3" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-6">
             
-            {/* Caption */}
             <div>
               <div className="flex items-center justify-between mb-2">
                 <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Caption</label>
@@ -657,15 +656,8 @@ function Upload() {
                 rows={4}
                 className="w-full px-4 py-3 rounded-xl bg-black/40 border border-white/10 text-white placeholder-gray-600 focus:outline-none focus:border-pink-500/50 transition-all resize-none"
               />
-              <div className="flex items-center gap-2 mt-3 p-3 rounded-xl bg-blue-500/5 border border-blue-500/20">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4 text-blue-400 shrink-0">
-                  <path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-                <p className="text-[11px] text-blue-300/80">Caption and location encrypted with AES-256-GCM on your device.</p>
-              </div>
             </div>
 
-            {/* Privacy */}
             <div>
               <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-3">Who Can See This</p>
               <div className="space-y-2">
@@ -693,7 +685,6 @@ function Upload() {
               </div>
             </div>
 
-            {/* Advanced */}
             <div>
               <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-3">Advanced</p>
               <div className="space-y-2">
@@ -720,7 +711,6 @@ function Upload() {
               </div>
             )}
 
-            {/* Navigation */}
             <div className="flex gap-3">
               <button
                 onClick={() => setStep(2)}
@@ -730,7 +720,7 @@ function Upload() {
               </button>
               <button
                 onClick={handlePublish}
-                className="flex-1 py-4 rounded-xl bg-gradient-to-r from-pink-600 via-purple-600 to-blue-600 hover:from-pink-500 hover:via-purple-500 hover:to-blue-500 text-white font-bold tracking-wide shadow-[0_0_30px_-10px_rgba(236,72,153,0.6)] transition-all transform hover:scale-[1.02]"
+                className="flex-1 py-4 rounded-xl bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:via-purple-500 hover:to-blue-500 text-white font-bold tracking-wide shadow-[0_0_30px_-10px_rgba(236,72,153,0.6)] transition-all transform hover:scale-[1.02]"
               >
                 Post It
               </button>
@@ -750,7 +740,7 @@ function Upload() {
               </svg>
             </div>
             <h3 className="text-2xl font-bold text-white mb-2">Uploading...</h3>
-            <p className="text-gray-500 text-sm mb-6">Encrypting caption and pushing to the cloud</p>
+            <p className="text-gray-500 text-sm mb-6">Pushing your chaos to the cloud</p>
             <div className="h-2 bg-white/10 rounded-full overflow-hidden max-w-md mx-auto">
               <motion.div className="h-full bg-gradient-to-r from-pink-500 to-blue-500" initial={{ width: 0 }} animate={{ width: `${uploadProgress}%` }} transition={{ duration: 0.2 }} />
             </div>
@@ -766,8 +756,14 @@ function Upload() {
             <div className="w-16 h-16 rounded-2xl bg-green-500/10 border border-green-500/30 flex items-center justify-center mx-auto mb-6">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-8 h-8 text-green-400"><path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" /></svg>
             </div>
-            <h3 className="text-2xl font-bold text-white mb-2">Posted & Encrypted</h3>
-            <p className="text-gray-500 text-sm">Redirecting to your profile...</p>
+            <h3 className="text-2xl font-bold text-white mb-2">
+              {postType === "story" ? "Story Posted" : "Posted Successfully"}
+            </h3>
+            <p className="text-gray-500 text-sm">
+              {postType === "story"
+                ? "Live for 24 hours. Redirecting..."
+                : "Redirecting to your profile..."}
+            </p>
           </motion.div>
         )}
       </AnimatePresence>

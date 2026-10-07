@@ -105,7 +105,7 @@ export function ToastProvider({ children }) {
                 initial={{ width: "100%" }}
                 animate={{ width: "0%" }}
                 transition={{ duration: 3.5, ease: "linear" }}
-                className="absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500"
+                className="absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-pink-500 via-purple-500 to-pink-500"
               />
             </motion.div>
           ))}

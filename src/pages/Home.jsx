@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { collection, getDocs, query, orderBy } from 'firebase/firestore';
 import { db } from '../firebase';
 import { Link } from 'react-router-dom';
+import StoryRow from "../components/StoryRow";
 
 function Home() {
   const [posts, setPosts] = useState([]);
@@ -18,8 +19,11 @@ function Home() {
   }, []);
 
   return (
-    <div className="w-full space-y-16">
+      <div className="w-full space-y-10">
       
+      {/* 🔥 Stories Row */}
+      <StoryRow />
+
       {/* 🔥 Hero Section */}
       <section className="relative rounded-2xl md:rounded-3xl overflow-hidden min-h-[60vh] md:min-h-[70vh] flex items-center justify-center border border-white/10 shadow-2xl">
         {/* 🔥 REPLACED 404 IMAGE WITH CYBERPUNK GRADIENT */}

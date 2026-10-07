@@ -68,7 +68,7 @@ function Profile() {
       <div className="relative bg-[#111111] border border-white/5 rounded-3xl overflow-hidden mb-10">
         
         {/* Cover Banner */}
-        <div className="h-40 w-full bg-gradient-to-r from-pink-600/40 via-purple-600/30 to-blue-600/40 relative">
+        <div className="h-40 w-full bg-gradient-to-r from-pink-600/40 via-purple-600/30 to-purple-700/40 relative">
           <div className="absolute inset-0 opacity-20" 
                style={{ backgroundImage: "linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)", backgroundSize: "20px 20px" }} />
         </div>
@@ -79,7 +79,7 @@ function Profile() {
             
             {/* Avatar */}
 <div className="relative">
-  <div className="w-28 h-28 rounded-2xl border-4 border-[#111111] bg-gradient-to-br from-pink-500 via-purple-500 to-blue-600 flex items-center justify-center shadow-[0_0_30px_-5px_rgba(236,72,153,0.5)] overflow-hidden">
+  <div className="w-28 h-28 rounded-2xl border-4 border-[#111111] bg-gradient-to-br from-pink-500 via-purple-500 to-purple-700 flex items-center justify-center shadow-[0_0_30px_-5px_rgba(236,72,153,0.5)] overflow-hidden">
     {userProfile?.photoURL ? (
       <img src={userProfile.photoURL} alt="Profile" className="w-full h-full object-cover" />
     ) : (
@@ -144,7 +144,7 @@ function Profile() {
       {posts.length === 0 ? (
         <div className="bg-[#111111] border border-white/5 rounded-2xl p-12 text-center">
           <p className="text-gray-500 font-mono text-sm mb-4">No uploads yet. Go slay some memes!</p>
-          <Link to="/upload" className="inline-block bg-gradient-to-r from-pink-600 to-blue-600 hover:from-pink-500 hover:to-blue-500 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition-all">
+          <Link to="/upload" className="inline-block bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition-all">
             Upload First Post
           </Link>
         </div>
