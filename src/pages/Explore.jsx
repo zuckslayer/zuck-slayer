@@ -124,9 +124,9 @@ function Explore() {
             {posts.map((p) => (
               <Link
                 key={p.id}
-                to="/reels"
+                to={`/p/${p.id}`}
                 className="relative group aspect-square bg-[#111111] border border-white/5 rounded-2xl overflow-hidden hover:border-pink-500/30 transition-all"
-                >
+              >
                 {p.url ? (
                   p.url.includes(".mp4") || p.url.includes("video") ? (
                     <video src={p.url} className="w-full h-full object-cover" />

@@ -7,6 +7,7 @@ import { useAuth } from "../context/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useToast } from "../components/Toast";
+import UserActionsMenu from "../components/UserActionsMenu"; // (not needed here, but harmless)
 
 function Settings() {
   const { currentUser, userProfile } = useAuth();
@@ -214,6 +215,17 @@ function Settings() {
         <div>
           <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-3 px-2 mt-6">Security</p>
           <div className="space-y-2">
+            <SettingsRow
+              icon={
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5">
+          <circle cx="12" cy="12" r="10" />
+          <path d="M4.93 4.93l14.14 14.14" strokeLinecap="round" />
+          </svg>
+          }
+          title="Blocked Accounts"
+          description="Manage who can't see or message you"
+          onClick={() => navigate("/blocked")}
+            />
             <SettingsRow
               icon={
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5">

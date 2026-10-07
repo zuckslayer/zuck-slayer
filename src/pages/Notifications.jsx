@@ -159,7 +159,7 @@ function Notifications() {
               {/* Post preview thumbnail */}
               {n.postPreviewUrl && (
                 <Link
-                  to="/feed"
+                  to={`/p/${n.postId}`}
                   className="w-12 h-12 rounded-lg overflow-hidden bg-black shrink-0 border border-white/10 hover:border-pink-500/50 transition-all"
                 >
                   <img

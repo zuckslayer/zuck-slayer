@@ -145,7 +145,7 @@ function Chats() {
         </div>
       ) : conversations.length === 0 ? (
         <div className="bg-[#111111] border border-white/5 rounded-3xl p-16 text-center">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-pink-500/20 to-blue-500/20 border border-white/10 flex items-center justify-center mx-auto mb-6">
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-pink-500/20 to-purple-500/20 border border-white/10 flex items-center justify-center mx-auto mb-6">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-8 h-8 text-pink-400">
               <path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
@@ -173,7 +173,7 @@ function Chats() {
                 to={`/chats/${conv.id}`}
                 className={`flex items-center gap-4 p-4 rounded-2xl border transition-all group ${
                   unread
-                    ? "bg-gradient-to-r from-pink-500/[0.06] to-blue-500/[0.03] border-pink-500/25 hover:border-pink-500/50"
+                    ? "bg-gradient-to-r from-pink-500/[0.06] to-purple-500/[0.03] border-pink-500/25 hover:border-pink-500/50"
                     : "bg-white/[0.02] border-white/5 hover:border-pink-500/30 hover:bg-white/[0.04]"
                 }`}
               >

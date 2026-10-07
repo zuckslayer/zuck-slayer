@@ -83,7 +83,7 @@ function Saved() {
             Tap the bookmark icon on any post to save it here.
           </p>
           <Link
-            to="/reels"
+            to={`/p/${item.postId}`}
             className="relative group block aspect-square bg-[#111111] border border-white/5 rounded-2xl overflow-hidden hover:border-pink-500/30 transition-all"
             >
             Browse the Feed
@@ -98,7 +98,7 @@ function Saved() {
               animate={{ opacity: 1, scale: 1 }}
             >
               <Link
-                to="/feed"
+                to={`/p/${item.postId}`}
                 className="relative group block aspect-square bg-[#111111] border border-white/5 rounded-2xl overflow-hidden hover:border-pink-500/30 transition-all"
               >
                 {item.postUrl ? (

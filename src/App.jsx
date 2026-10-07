@@ -22,6 +22,10 @@ import StoryViewer from "./components/StoryViewer";
 import UserProfile from "./pages/UserProfile";
 import Chats from "./pages/Chats";
 import ChatThread from "./pages/ChatThread";
+import PostDetail from "./pages/PostDetail";
+import BlockedUsers from "./pages/BlockedUsers";
+import Onboarding from "./components/Onboarding";
+import FeedbackButton from "./components/FeedbackButton";
 
 function App() {
   const [showIntro, setShowIntro] = useState(() => {
@@ -58,6 +62,8 @@ function App() {
           <Route path="/u/:username" element={<PrivateRoute><UserProfile /></PrivateRoute>} />
           <Route path="/chats" element={<PrivateRoute><Chats /></PrivateRoute>} />
           <Route path="/chats/:conversationId" element={<PrivateRoute><ChatThread /></PrivateRoute>} />
+          <Route path="/p/:postId" element={<PrivateRoute><PostDetail /></PrivateRoute>} />
+          <Route path="/blocked" element={<PrivateRoute><BlockedUsers /></PrivateRoute>} />
 
           {/* 🔥 Old /feed route now redirects to Reels */}
           <Route path="/feed" element={<Navigate to="/reels" replace />} />
@@ -72,6 +78,9 @@ function App() {
           />
         )}
       </AnimatePresence>
+
+      <Onboarding />
+      <FeedbackButton />
     </div>
   );
 }
