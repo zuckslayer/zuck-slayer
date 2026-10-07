@@ -5,6 +5,7 @@ import { doc, setDoc, collection, query, where, getDocs, serverTimestamp } from 
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useToast } from "../components/Toast";
+import { LogoFull, LogoMark } from "../components/Logo";
 
 function Signup() {
   const [email, setEmail] = useState("");
@@ -87,19 +88,8 @@ function Signup() {
       <div className="fixed bottom-[-200px] right-[-200px] w-[500px] h-[500px] rounded-full bg-purple-600/25 blur-[130px] pointer-events-none" />
 
       <div className="hidden lg:flex lg:w-1/2 relative z-10 flex-col justify-between p-14 border-r border-white/5">
-        <Link to="/" className="flex items-center gap-4 w-fit group">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-pink-500 via-purple-500 to-purple-700 flex items-center justify-center shadow-[0_0_30px_-5px_rgba(236,72,153,0.6)] group-hover:shadow-[0_0_45px_-5px_rgba(236,72,153,0.9)] group-hover:scale-105 transition-all duration-300">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" className="w-6 h-6 text-white">
-              <path d="M7 20L14 4" /><path d="M13 20L20 4" />
-            </svg>
-          </div>
-          <div>
-            <h1 className="text-2xl font-black text-white tracking-tighter leading-none">
-              ZUCK<span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-500"> SLAYER</span>
-            </h1>
-            <p className="text-[10px] text-gray-500 font-mono tracking-widest mt-1.5">EST. 2025 · v0.1.0 BETA</p>
-          </div>
-        </Link>
+        {/* 🔥 New logo */}
+        <LogoFull />
 
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
           <h2 className="text-6xl xl:text-7xl font-black text-white tracking-tighter leading-[0.95] mb-8">
@@ -127,12 +117,9 @@ function Signup() {
 
       <div className="flex-1 flex items-center justify-center p-6 lg:p-12 relative z-10">
         <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: "easeOut" }} className="w-full max-w-md">
+          {/* 🔥 New mobile logo */}
           <Link to="/" className="lg:hidden flex items-center justify-center gap-3 mb-8">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-pink-500 via-purple-500 to-purple-700 flex items-center justify-center shadow-[0_0_25px_-5px_rgba(236,72,153,0.6)]">
-              <svg viewBox="0 0 24 24" fill="none" className="w-7 h-7 text-white" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
-                <path d="M7 20L14 4" /><path d="M13 20L20 4" />
-              </svg>
-            </div>
+            <LogoMark size="lg" />
             <h1 className="text-2xl font-black text-white tracking-tighter">
               ZUCK<span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-500"> SLAYER</span>
             </h1>

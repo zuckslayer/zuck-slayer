@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { collection, getDocs, query, orderBy } from 'firebase/firestore';
 import { db } from '../firebase';
 import { Link } from 'react-router-dom';
-import StoryRow from "../components/StoryRow";
+import StoryRow from '../components/StoryRow';
 
 function Home() {
   const [posts, setPosts] = useState([]);
@@ -19,25 +19,23 @@ function Home() {
   }, []);
 
   return (
-      <div className="w-full space-y-10">
-      
+    <div className="w-full space-y-10">
+
       {/* 🔥 Stories Row */}
       <StoryRow />
 
       {/* 🔥 Hero Section */}
       <section className="relative rounded-2xl md:rounded-3xl overflow-hidden min-h-[60vh] md:min-h-[70vh] flex items-center justify-center border border-white/10 shadow-2xl">
-        {/* 🔥 REPLACED 404 IMAGE WITH CYBERPUNK GRADIENT */}
-        <div 
+        <div
           className="absolute inset-0"
           style={{
-            background: "radial-gradient(circle at 20% 20%, rgba(236,72,153,0.25) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(24,119,242,0.25) 0%, transparent 50%), linear-gradient(180deg, #0a0a0a 0%, #111111 100%)"
+            background: "radial-gradient(circle at 20% 20%, rgba(236,72,153,0.25) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(168,85,247,0.25) 0%, transparent 50%), linear-gradient(180deg, #0a0a0a 0%, #111111 100%)"
           }}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent" />
 
-        {/* Hero Content */}
         <div className="relative z-10 text-center max-w-2xl px-6 flex flex-col items-center">
-          
+
           <motion.h1
             initial={{ opacity: 0, y: 40, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -47,7 +45,7 @@ function Home() {
             ZUCK SLAYER
           </motion.h1>
 
-          <motion.p 
+          <motion.p
             className="text-lg md:text-2xl text-gray-300 mb-10 font-mono tracking-tight"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -55,26 +53,25 @@ function Home() {
           >
             Meme warfare. No mercy. Join the rebellion.
           </motion.p>
-          
-          <motion.div 
+
+          <motion.div
             className="flex flex-col sm:flex-row gap-4 justify-center items-center w-full"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.8, duration: 0.8 }}
           >
-            <a
-              href="https://www.instagram.com/tusharpatel6285"
-              target="_blank"
-              rel="noopener noreferrer"
+            {/* 🔥 No more Instagram — internal link only */}
+            <Link
+              to="/explore"
               className="w-full sm:w-auto bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white font-bold py-4 px-8 rounded-full shadow-[0_0_40px_-10px_rgba(236,72,153,0.5)] transition-all duration-300 transform hover:scale-105"
             >
-              Follow the Chaos
-            </a>
+              Explore the Chaos
+            </Link>
             <Link
-              to="/feed"
+              to="/reels"
               className="w-full sm:w-auto bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold py-4 px-8 rounded-full backdrop-blur-md transition-all duration-300"
             >
-              Explore the Feed
+              Watch Reels
             </Link>
           </motion.div>
         </div>
@@ -85,12 +82,16 @@ function Home() {
         <section className="space-y-6">
           <div className="flex items-center justify-between border-b border-white/5 pb-4">
             <h2 className="text-2xl font-bold text-white tracking-tight">Latest Drops</h2>
-            <Link to="/feed" className="text-sm text-pink-400 hover:text-pink-300 transition">View All →</Link>
+            <Link to="/explore" className="text-sm text-pink-400 hover:text-pink-300 transition">View All →</Link>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {posts.slice(0, 3).map((post) => (
-              <div key={post.id} className="bg-[#111111] border border-white/5 p-4 rounded-2xl shadow-lg hover:border-pink-500/30 transition-all group overflow-hidden">
+              <Link
+                key={post.id}
+                to={`/p/${post.id}`}
+                className="bg-[#111111] border border-white/5 p-4 rounded-2xl shadow-lg hover:border-pink-500/30 transition-all group overflow-hidden block"
+              >
                 <div className="relative overflow-hidden rounded-xl bg-black aspect-video flex items-center justify-center">
                   {post.url ? (
                     post.url.includes('.mp4') || post.url.includes('video') ? (
@@ -103,7 +104,7 @@ function Home() {
                   )}
                 </div>
                 <p className="mt-3 text-sm text-gray-300 truncate">{post.caption}</p>
-              </div>
+              </Link>
             ))}
           </div>
         </section>

@@ -141,7 +141,12 @@ function Legal() {
           <div className="mt-8 p-4 rounded-2xl bg-white/[0.02] border border-white/5 flex items-center justify-between flex-wrap gap-4">
             <div>
               <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">Support Email</p>
-              <p className="text-sm font-mono text-pink-400">support@zuckslayer.com</p>
+              <a
+                href="mailto:helper27076@gmail.com?subject=Zuck%20Slayer%20Support&body=Hi%2C%20I%20have%20a%20question%20about..."
+                className="text-sm font-mono text-pink-400 hover:text-pink-300 underline underline-offset-2 transition-colors"
+              >
+                helper27076@gmail.com
+              </a>
             </div>
             <Link to="/signup" className="text-xs font-bold bg-white/5 hover:bg-white/10 border border-white/10 px-5 py-2.5 rounded-full transition-all">
               Return to the Rebellion
