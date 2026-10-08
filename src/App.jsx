@@ -24,6 +24,7 @@ import Chats from "./pages/Chats";
 import ChatThread from "./pages/ChatThread";
 import PostDetail from "./pages/PostDetail";
 import BlockedUsers from "./pages/BlockedUsers";
+import FollowList from "./pages/FollowList";
 import Onboarding from "./components/Onboarding";
 import FeedbackButton from "./components/FeedbackButton";
 
@@ -64,6 +65,8 @@ function App() {
           <Route path="/chats/:conversationId" element={<PrivateRoute><ChatThread /></PrivateRoute>} />
           <Route path="/p/:postId" element={<PrivateRoute><PostDetail /></PrivateRoute>} />
           <Route path="/blocked" element={<PrivateRoute><BlockedUsers /></PrivateRoute>} />
+          <Route path="/u/:username/followers" element={<PrivateRoute><FollowList /></PrivateRoute>} />
+          <Route path="/u/:username/following" element={<PrivateRoute><FollowList /></PrivateRoute>} />
 
           {/* 🔥 Old /feed route now redirects to Reels */}
           <Route path="/feed" element={<Navigate to="/reels" replace />} />

@@ -414,14 +414,22 @@ function UserProfile() {
               <p className="text-2xl font-bold text-white">{canSeePosts ? posts.length : "—"}</p>
               <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Posts</p>
             </div>
-            <div>
+
+            <Link
+              to={`/u/${profileUser.username}/followers`}
+              className="hover:opacity-80 transition-opacity"
+            >
               <p className="text-2xl font-bold text-white">{followersCount}</p>
               <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Followers</p>
-            </div>
-            <div>
+            </Link>
+
+            <Link
+              to={`/u/${profileUser.username}/following`}
+              className="hover:opacity-80 transition-opacity"
+            >
               <p className="text-2xl font-bold text-white">{followingCount}</p>
               <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Following</p>
-            </div>
+            </Link>
           </div>
         </div>
       </motion.div>

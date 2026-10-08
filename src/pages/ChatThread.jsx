@@ -350,7 +350,7 @@ function ChatThread() {
             </p>
             <p className="text-[10px] text-gray-500 font-mono flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
-              End-to-end encrypted
+              AES-256 encrypted
             </p>
           </div>
         </Link>

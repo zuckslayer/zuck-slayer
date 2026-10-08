@@ -122,7 +122,7 @@ function Chats() {
             Messages
           </h1>
           <p className="text-gray-500 text-sm mt-1">
-            End-to-end encrypted. We can't read them either.
+            Messages are AES-256 encrypted. Keys stay on your device.
           </p>
         </div>
         <button

@@ -11,7 +11,7 @@ const STEPS = [
       </svg>
     ),
     title: "Private by default",
-    body: "Your DMs are end-to-end encrypted. Nobody — not even us — can read them. Ever.",
+    body: "Your DMs are AES-256 encrypted. Keys live on your device — never on our servers.",
   },
   {
     icon: (
