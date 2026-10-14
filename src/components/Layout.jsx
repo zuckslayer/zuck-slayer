@@ -3,6 +3,7 @@ import { Outlet, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import Navbar from "./Navbar";
 import { LogoMark } from "./Logo";
+import DeletionBanner from "./DeletionBanner";
 
 function Layout() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -105,7 +106,9 @@ function Layout() {
         )}
       </AnimatePresence>
 
-      {/* ═══ MAIN ═══ */}
+      {/* ═══ MAIN ═══ */} {/* 🔥 Pending deletion banner */}
+      <DeletionBanner />
+
       <main className="flex-1 md:ml-72 relative min-h-[100dvh] w-full">
         {isReels ? (
           <Outlet />

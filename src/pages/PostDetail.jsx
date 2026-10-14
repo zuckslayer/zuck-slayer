@@ -473,7 +473,7 @@ function PostDetail() {
             {post.taggedUsers && post.taggedUsers.length > 0 && (
               <div className="flex flex-wrap gap-1.5">
                 {post.taggedUsers.map((u, i) => (
-                  <Link key={i} to={`/u/${u}`} className="text-[11px] text-blue-400 bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 rounded-full hover:bg-blue-500/20 transition-colors">
+                  <Link key={i} to={`/u/${u}`} className="text-[11px] text-purple-400 bg-purple-500/10 border border-purple-500/20 px-2 py-0.5 rounded-full hover:bg-purple-500/20 transition-colors">
                     @{u}
                   </Link>
                 ))}

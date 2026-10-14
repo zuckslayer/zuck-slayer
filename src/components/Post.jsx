@@ -391,7 +391,7 @@ function Post({
               onClick={(e) => e.stopPropagation()}
               className="absolute top-4 left-14 z-20 flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/50 backdrop-blur-xl border border-white/15 hover:border-pink-500/50 transition-all group/author"
             >
-              <div className="w-6 h-6 rounded-full bg-gradient-to-br from-pink-500 via-purple-500 to-blue-600 flex items-center justify-center overflow-hidden shrink-0">
+              <div className="w-6 h-6 rounded-full bg-gradient-to-br from-pink-500 via-purple-500 to-purple-600 flex items-center justify-center overflow-hidden shrink-0">
                 {authorPhoto ? (
                   <img src={authorPhoto} alt="" className="w-full h-full object-cover" />
                 ) : (
@@ -638,7 +638,7 @@ function Post({
             <Link
               key={i}
               to={`/u/${u}`}
-              className="text-[11px] text-blue-400 bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 rounded-full hover:bg-blue-500/20 transition-colors"
+              className="text-[11px] text-purple-400 bg-purple-500/10 border border-purple-500/20 px-2 py-0.5 rounded-full hover:bg-purple-500/20 transition-colors"
             >
               @{u}
             </Link>
@@ -670,7 +670,7 @@ function Post({
                 />
                 <button
                   type="submit"
-                  className="bg-gradient-to-r from-pink-600 to-blue-600 hover:from-pink-500 hover:to-blue-500 px-5 py-2.5 rounded-xl text-white text-sm font-bold transition-all active:scale-95 disabled:opacity-40"
+                  className="bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 px-5 py-2.5 rounded-xl text-white text-sm font-bold transition-all active:scale-95 disabled:opacity-40"
                   disabled={!isAuthenticated}
                 >
                   Send
@@ -689,7 +689,7 @@ function Post({
                     className="flex justify-between items-start text-xs gap-3 group/comment"
                   >
                     <div className="flex-1 flex items-start gap-2">
-                      <div className="w-6 h-6 rounded-full bg-gradient-to-br from-pink-500 via-purple-500 to-blue-600 flex items-center justify-center shrink-0">
+                      <div className="w-6 h-6 rounded-full bg-gradient-to-br from-pink-500 via-purple-500 to-purple-600 flex items-center justify-center shrink-0">
                         <span className="text-[9px] font-black text-white">
                           {c.username.charAt(0).toUpperCase()}
                         </span>

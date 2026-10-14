@@ -10,7 +10,6 @@ import {
 import { useAuth } from "../context/AuthContext";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-
 function Search() {
   const { currentUser } = useAuth();
   const [term, setTerm] = useState("");
@@ -46,6 +45,7 @@ function Search() {
         const usersSnap = await getDocs(usersQ);
         const users = usersSnap.docs
           .map((d) => ({ id: d.id, ...d.data() }))
+          .filter((u) => !u.deactivated && !u.pendingDeletion)
           .filter((u) => u.id !== currentUser?.uid);
         setUserResults(users);
 
@@ -58,7 +58,7 @@ function Search() {
           limit(15)
         );
         const postsSnap = await getDocs(postsQ);
-        const posts = postsSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
+        const posts = postsSnap.docs.map((d) => ({ id: d.id, ...d.data() })).filter((p) => !p.deactivated);
         setPostResults(posts);
       } catch (err) {
         console.warn("Search failed:", err);
@@ -125,7 +125,7 @@ function Search() {
               onClick={() => setTab(t.id)}
               className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border transition-all ${
                 tab === t.id
-                  ? "bg-gradient-to-r from-pink-500/20 to-blue-500/10 text-pink-400 border-pink-500/30"
+                  ? "bg-gradient-to-r from-pink-500/20 to-purple-500/10 text-pink-400 border-pink-500/30"
                   : "bg-white/[0.02] text-gray-400 border-white/5 hover:bg-white/[0.05] hover:text-white"
               }`}
             >
@@ -143,7 +143,7 @@ function Search() {
       {/* Results */}
       {term.trim().length === 0 ? (
         <div className="bg-[#111111] border border-white/5 rounded-3xl p-16 text-center">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-pink-500/20 to-blue-500/20 border border-white/10 flex items-center justify-center mx-auto mb-6">
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-pink-500/20 to-purple-500/20 border border-white/10 flex items-center justify-center mx-auto mb-6">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-8 h-8 text-pink-400">
               <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
@@ -182,7 +182,7 @@ function Search() {
                     to={`/u/${u.username}`}
                     className="flex items-center gap-4 p-4 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-pink-500/30 hover:bg-white/[0.04] transition-all group"
                   >
-                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-pink-500 via-purple-500 to-blue-600 flex items-center justify-center overflow-hidden shrink-0">
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-pink-500 via-purple-500 to-purple-600 flex items-center justify-center overflow-hidden shrink-0">
                       {u.photoURL ? (
                         <img src={u.photoURL} alt="" className="w-full h-full object-cover" />
                       ) : (

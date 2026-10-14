@@ -244,7 +244,7 @@ function Upload() {
       <div className="mb-8">
         <h1 className="text-3xl md:text-4xl font-black tracking-tighter text-white">
           Upload{" "}
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-blue-500">
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-500">
             Media
           </span>
         </h1>
@@ -261,7 +261,7 @@ function Upload() {
               <div
                 className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold transition-all ${
                   step === i + 1
-                    ? "bg-gradient-to-r from-pink-500/20 to-blue-500/10 text-pink-400 border border-pink-500/30"
+                    ? "bg-gradient-to-r from-pink-500/20 to-purple-500/10 text-pink-400 border border-pink-500/30"
                     : step > i + 1
                     ? "text-green-400"
                     : "text-gray-600"
@@ -295,7 +295,7 @@ function Upload() {
                     onClick={() => setPostType(type.id)}
                     className={`p-3 rounded-2xl border text-left transition-all ${
                       postType === type.id
-                        ? "bg-gradient-to-br from-pink-500/15 to-blue-500/10 border-pink-500/40"
+                        ? "bg-gradient-to-br from-pink-500/15 to-purple-500/10 border-pink-500/40"
                         : "bg-white/[0.02] border-white/5 hover:border-white/10"
                     }`}
                   >
@@ -332,7 +332,7 @@ function Upload() {
                   onChange={(e) => handleFileSelect(e.target.files)}
                   className="hidden"
                 />
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-pink-500/20 to-blue-500/20 border border-white/10 flex items-center justify-center mx-auto mb-6">
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-pink-500/20 to-purple-500/20 border border-white/10 flex items-center justify-center mx-auto mb-6">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-8 h-8 text-pink-400">
                     <path d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
@@ -439,7 +439,7 @@ function Upload() {
             {files.length > 0 && (
               <button
                 onClick={() => setStep(2)}
-                className="w-full py-4 rounded-xl bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:via-purple-500 hover:to-blue-500 text-white font-bold tracking-wide shadow-[0_0_30px_-10px_rgba(236,72,153,0.6)] transition-all transform hover:scale-[1.02]"
+                className="w-full py-4 rounded-xl bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:via-purple-500 hover:to-purple-500 text-white font-bold tracking-wide shadow-[0_0_30px_-10px_rgba(236,72,153,0.6)] transition-all transform hover:scale-[1.02]"
               >
                 Next: Enhance
               </button>
@@ -496,7 +496,7 @@ function Upload() {
                   onClick={() => setActiveEnhanceTab(tab.id)}
                   className={`px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap border transition-all ${
                     activeEnhanceTab === tab.id
-                      ? "bg-gradient-to-r from-pink-500/20 to-blue-500/10 text-pink-400 border-pink-500/30"
+                      ? "bg-gradient-to-r from-pink-500/20 to-purple-500/10 text-pink-400 border-pink-500/30"
                       : "bg-white/[0.02] text-gray-400 border-white/5 hover:bg-white/[0.05]"
                   }`}
                 >
@@ -629,7 +629,7 @@ function Upload() {
               </button>
               <button
                 onClick={() => setStep(3)}
-                className="flex-1 py-4 rounded-xl bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:via-purple-500 hover:to-blue-500 text-white font-bold tracking-wide shadow-[0_0_30px_-10px_rgba(236,72,153,0.6)] transition-all transform hover:scale-[1.02]"
+                className="flex-1 py-4 rounded-xl bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:via-purple-500 hover:to-purple-500 text-white font-bold tracking-wide shadow-[0_0_30px_-10px_rgba(236,72,153,0.6)] transition-all transform hover:scale-[1.02]"
               >
                 Next: Details
               </button>
@@ -667,7 +667,7 @@ function Upload() {
                     onClick={() => setPrivacy(opt.id)}
                     className={`w-full flex items-center justify-between p-4 rounded-xl border transition-all text-left ${
                       privacy === opt.id
-                        ? "bg-gradient-to-r from-pink-500/10 to-blue-500/5 border-pink-500/30"
+                        ? "bg-gradient-to-r from-pink-500/10 to-purple-500/5 border-pink-500/30"
                         : "bg-white/[0.02] border-white/5 hover:border-white/10"
                     }`}
                   >
@@ -720,7 +720,7 @@ function Upload() {
               </button>
               <button
                 onClick={handlePublish}
-                className="flex-1 py-4 rounded-xl bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:via-purple-500 hover:to-blue-500 text-white font-bold tracking-wide shadow-[0_0_30px_-10px_rgba(236,72,153,0.6)] transition-all transform hover:scale-[1.02]"
+                className="flex-1 py-4 rounded-xl bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:via-purple-500 hover:to-purple-500 text-white font-bold tracking-wide shadow-[0_0_30px_-10px_rgba(236,72,153,0.6)] transition-all transform hover:scale-[1.02]"
               >
                 Post It
               </button>
@@ -733,7 +733,7 @@ function Upload() {
         {/* ═══════════════════════════════════════ */}
         {step === 4 && (
           <motion.div key="step4" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="bg-[#111111] border border-white/10 rounded-3xl p-12 text-center">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-pink-500/20 to-blue-500/20 border border-white/10 flex items-center justify-center mx-auto mb-6">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-pink-500/20 to-purple-500/20 border border-white/10 flex items-center justify-center mx-auto mb-6">
               <svg className="animate-spin h-8 w-8 text-pink-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -742,7 +742,7 @@ function Upload() {
             <h3 className="text-2xl font-bold text-white mb-2">Uploading...</h3>
             <p className="text-gray-500 text-sm mb-6">Pushing your chaos to the cloud</p>
             <div className="h-2 bg-white/10 rounded-full overflow-hidden max-w-md mx-auto">
-              <motion.div className="h-full bg-gradient-to-r from-pink-500 to-blue-500" initial={{ width: 0 }} animate={{ width: `${uploadProgress}%` }} transition={{ duration: 0.2 }} />
+              <motion.div className="h-full bg-gradient-to-r from-pink-500 to-purple-500" initial={{ width: 0 }} animate={{ width: `${uploadProgress}%` }} transition={{ duration: 0.2 }} />
             </div>
             <p className="text-xs font-mono text-pink-400 mt-3">{uploadProgress}%</p>
           </motion.div>

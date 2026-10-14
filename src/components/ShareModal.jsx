@@ -86,6 +86,7 @@ function ShareModal({ post, onClose }) {
         const snap = await getDocs(usersRef);
         const filtered = snap.docs
           .map((d) => ({ id: d.id, ...d.data() }))
+          .filter((u) => !u.deactivated && !u.pendingDeletion)
           .filter((u) => u.id !== currentUser.uid)
           .filter((u) => {
             const name = (u.username || "").toLowerCase();
@@ -310,7 +311,7 @@ function ShareModal({ post, onClose }) {
                           : "hover:bg-white/[0.05] border border-transparent"
                       } disabled:cursor-not-allowed`}
                     >
-                      <div className="w-11 h-11 rounded-full bg-gradient-to-br from-pink-500 via-purple-500 to-blue-600 flex items-center justify-center overflow-hidden shrink-0">
+                      <div className="w-11 h-11 rounded-full bg-gradient-to-br from-pink-500 via-purple-500 to-purple-600 flex items-center justify-center overflow-hidden shrink-0">
                         {u.photoURL ? (
                           <img src={u.photoURL} alt="" className="w-full h-full object-cover" />
                         ) : (
@@ -368,7 +369,7 @@ function ShareModal({ post, onClose }) {
                         >
                           <div className="relative">
                             <div
-                              className={`w-14 h-14 rounded-full bg-gradient-to-br from-pink-500 via-purple-500 to-blue-600 flex items-center justify-center overflow-hidden border-2 transition-all ${
+                              className={`w-14 h-14 rounded-full bg-gradient-to-br from-pink-500 via-purple-500 to-purple-600 flex items-center justify-center overflow-hidden border-2 transition-all ${
                                 isSent
                                   ? "border-green-500"
                                   : "border-transparent group-hover:border-pink-500"
@@ -440,7 +441,7 @@ function ShareModal({ post, onClose }) {
                             : "hover:bg-white/[0.05] border border-transparent"
                         } disabled:cursor-not-allowed`}
                       >
-                        <div className="w-11 h-11 rounded-full bg-gradient-to-br from-pink-500 via-purple-500 to-blue-600 flex items-center justify-center overflow-hidden shrink-0">
+                        <div className="w-11 h-11 rounded-full bg-gradient-to-br from-pink-500 via-purple-500 to-purple-600 flex items-center justify-center overflow-hidden shrink-0">
                           {u.photoURL ? (
                             <img src={u.photoURL} alt="" className="w-full h-full object-cover" />
                           ) : (

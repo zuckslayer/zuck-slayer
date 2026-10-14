@@ -80,7 +80,7 @@ function Feed() {
 
         <Link
           to="/upload"
-          className="self-start md:self-auto bg-gradient-to-r from-pink-600 to-blue-600 hover:from-pink-500 hover:to-blue-500 text-white font-bold text-sm py-2.5 px-5 rounded-xl shadow-[0_0_20px_-5px_rgba(236,72,153,0.5)] transition-all flex items-center gap-2"
+          className="self-start md:self-auto bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white font-bold text-sm py-2.5 px-5 rounded-xl shadow-[0_0_20px_-5px_rgba(236,72,153,0.5)] transition-all flex items-center gap-2"
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4">
             <path d="M12 4v16m8-8H4" strokeLinecap="round" strokeLinejoin="round" />
@@ -97,7 +97,7 @@ function Feed() {
             onClick={() => setActiveFilter(filter.id)}
             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all whitespace-nowrap border ${
               activeFilter === filter.id
-                ? "bg-gradient-to-r from-pink-500/20 to-blue-500/10 text-pink-400 border-pink-500/30"
+                ? "bg-gradient-to-r from-pink-500/20 to-purple-500/10 text-pink-400 border-pink-500/30"
                 : "bg-white/[0.02] text-gray-400 border-white/5 hover:bg-white/[0.05] hover:text-white"
             }`}
           >
@@ -110,7 +110,7 @@ function Feed() {
       {/* 🔥 Posts Grid */}
       {posts.length === 0 && !loading ? (
         <div className="bg-[#111111] border border-white/5 rounded-3xl p-16 text-center">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-pink-500/20 to-blue-500/20 border border-white/10 flex items-center justify-center mx-auto mb-6">
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-pink-500/20 to-purple-500/20 border border-white/10 flex items-center justify-center mx-auto mb-6">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-8 h-8 text-pink-400">
               <path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
@@ -121,7 +121,7 @@ function Feed() {
           </p>
           <Link
             to="/upload"
-            className="inline-block bg-gradient-to-r from-pink-600 to-blue-600 hover:from-pink-500 hover:to-blue-500 text-white font-bold py-3 px-8 rounded-xl shadow-lg transition-all"
+            className="inline-block bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white font-bold py-3 px-8 rounded-xl shadow-lg transition-all"
           >
             Upload First Post
           </Link>

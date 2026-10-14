@@ -78,7 +78,7 @@ export function ToastProvider({ children }) {
               className={`pointer-events-auto cursor-pointer flex items-start gap-3 p-4 rounded-2xl bg-[#111111]/95 backdrop-blur-xl border ${styles[toast.type]} relative overflow-hidden group`}
             >
               {/* Gradient accent line */}
-              <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-pink-500 to-blue-500"></div>
+              <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-pink-500 to-purple-500"></div>
 
               {/* Icon */}
               <div className={`shrink-0 w-9 h-9 rounded-xl flex items-center justify-center ${iconStyles[toast.type]}`}>

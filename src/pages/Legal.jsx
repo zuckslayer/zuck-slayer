@@ -19,20 +19,20 @@ function Legal() {
 
       {/* Glow Orbs */}
       <div className="fixed top-[-200px] left-[-200px] w-[500px] h-[500px] rounded-full bg-pink-600/15 blur-[130px] pointer-events-none" />
-      <div className="fixed bottom-[-200px] right-[-200px] w-[500px] h-[500px] rounded-full bg-blue-600/15 blur-[130px] pointer-events-none" />
+      <div className="fixed bottom-[-200px] right-[-200px] w-[500px] h-[500px] rounded-full bg-purple-600/15 blur-[130px] pointer-events-none" />
 
       {/* Top Navbar */}
       <nav className="relative z-10 border-b border-white/5 bg-[#0a0a0a]/80 backdrop-blur-md sticky top-0">
         <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-3 group">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-pink-500 to-blue-600 flex items-center justify-center shadow-[0_0_15px_-3px_rgba(236,72,153,0.5)] group-hover:shadow-[0_0_25px_-3px_rgba(236,72,153,0.8)] transition-all">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center shadow-[0_0_15px_-3px_rgba(236,72,153,0.5)] group-hover:shadow-[0_0_25px_-3px_rgba(236,72,153,0.8)] transition-all">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" className="w-6 h-6 text-white">
               <path d="M7 20L14 4" />
               <path d="M13 20L20 4" />
               </svg>
             </div>
             <span className="text-sm font-bold text-white tracking-tight hidden sm:block">
-              ZUCK<span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-blue-500"> SLAYER</span>
+              ZUCK<span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-500"> SLAYER</span>
             </span>
           </Link>
           <button 
@@ -54,7 +54,7 @@ function Legal() {
         {/* Header */}
         <div className="mb-16">
           <h1 className="text-5xl md:text-6xl font-black text-white tracking-tighter mb-4">
-            The <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-blue-500">Fine Print</span>
+            The <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-500">Fine Print</span>
           </h1>
           <p className="text-lg text-gray-400 max-w-xl">
             We're building a social network that actually respects you. Here's the honest truth about how we handle your data and what we expect from you.
@@ -79,15 +79,19 @@ function Legal() {
           <div className="space-y-6 text-[15px] leading-relaxed text-gray-400">
             <div>
               <h3 className="text-white font-semibold mb-2">What we collect</h3>
-              <p>The bare minimum. Your email and username are required to create an account. That's it. We don't ask for your phone number, your real name, or your location.</p>
+                <p>Your email and username are required to create an account. That's it. We don't ask for your phone number, your real name, or your location.</p>
             </div>
             <div>
               <h3 className="text-white font-semibold mb-2">How we protect it</h3>
-              <p>Your chats and captions are encrypted on your device using AES-256-GCM before they ever touch our servers. We use Firebase for authentication and Firestore for database storage, but your encryption keys never leave your device. We literally cannot read your messages.</p>
+                <p>Your DMs are encrypted with AES-256. Keys are stored on your device, not on our servers. We use Firebase for authentication and infrastructure. We don't sell or share your data with any third party.</p>
+            </div>
+            <div>
+              <h3 className="text-white font-semibold mb-2">Account deletion</h3>
+                <p>You can schedule your account for permanent deletion at any time in Settings. Your profile will be hidden immediately, but your data is retained for 30 days so you can change your mind — simply log back in and click "Cancel Deletion" in the banner. After 30 days, your account, posts, comments, messages, and media are permanently wiped from our servers.</p>
             </div>
             <div>
               <h3 className="text-white font-semibold mb-2">What we don't do</h3>
-              <p>We don't sell your data. We don't run ads. We don't track your behavior across the internet. We don't build shadow profiles of you. If you delete your account, your data is permanently deleted from our servers within 30 days.</p>
+                <p>We don't sell your data. We don't run ads. We don't track your behavior across the internet. We don't build shadow profiles of you. We don't scan your messages.</p>
             </div>
           </div>
         </section>
@@ -99,7 +103,7 @@ function Legal() {
         <section className="mb-16">
           <div className="flex items-center gap-4 mb-6">
             <div className="w-10 h-10 rounded-xl bg-white/[0.03] border border-white/10 flex items-center justify-center">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5 text-blue-400">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5 text-purple-400">
                 <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </div>

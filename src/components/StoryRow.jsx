@@ -122,7 +122,7 @@ function StoryRow() {
               }`}
             >
               <div className="w-full h-full rounded-full bg-[#0a0a0a] p-[2px]">
-                <div className="w-full h-full rounded-full bg-gradient-to-br from-pink-500 via-purple-500 to-blue-600 flex items-center justify-center overflow-hidden">
+                <div className="w-full h-full rounded-full bg-gradient-to-br from-pink-500 via-purple-500 to-purple-600 flex items-center justify-center overflow-hidden">
                   <span className="text-lg font-black text-white">+</span>
                 </div>
               </div>
@@ -144,7 +144,7 @@ function StoryRow() {
             >
               <div className="w-16 h-16 rounded-full p-[2px] bg-gradient-to-tr from-pink-500 via-purple-500 to-pink-500">
                 <div className="w-full h-full rounded-full bg-[#0a0a0a] p-[2px]">
-                  <div className="w-full h-full rounded-full bg-gradient-to-br from-pink-500 via-purple-500 to-blue-600 flex items-center justify-center overflow-hidden">
+                  <div className="w-full h-full rounded-full bg-gradient-to-br from-pink-500 via-purple-500 to-purple-600 flex items-center justify-center overflow-hidden">
                     {group.photoURL ? (
                       <img
                         src={group.photoURL}

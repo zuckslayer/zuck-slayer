@@ -255,6 +255,7 @@ function NewChatModal({ onClose, currentUser, userProfile }) {
         const snap = await getDocs(usersRef);
         const filtered = snap.docs
           .map((d) => ({ id: d.id, ...d.data() }))
+          .filter((u) => !u.deactivated && !u.pendingDeletion)
           .filter((u) => u.id !== currentUser.uid)
           .filter((u) => {
             const name = (u.username || "").toLowerCase();

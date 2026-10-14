@@ -139,7 +139,7 @@ function EmptyState({ tab, followedCount }) {
   return (
     <div className="flex-1 flex items-center justify-center p-8">
       <div className="max-w-md text-center">
-        <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-pink-500/20 to-blue-500/20 border border-white/10 flex items-center justify-center mx-auto mb-6">
+        <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-pink-500/20 to-purple-500/20 border border-white/10 flex items-center justify-center mx-auto mb-6">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-10 h-10 text-pink-400">
             <path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
@@ -156,7 +156,7 @@ function EmptyState({ tab, followedCount }) {
         </p>
         <Link
           to="/upload"
-          className="inline-block bg-gradient-to-r from-pink-600 to-blue-600 hover:from-pink-500 hover:to-blue-500 text-white font-bold py-3 px-8 rounded-full shadow-[0_0_30px_-10px_rgba(236,72,153,0.6)] transition-all"
+          className="inline-block bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white font-bold py-3 px-8 rounded-full shadow-[0_0_30px_-10px_rgba(236,72,153,0.6)] transition-all"
         >
           Upload a Reel
         </Link>
@@ -500,7 +500,7 @@ function ReelItem({ reel, currentUser }) {
           {authorPhoto ? (
             <img src={authorPhoto} alt="" className="w-full h-full object-cover" />
           ) : (
-            <div className="w-full h-full bg-gradient-to-br from-pink-500 via-purple-500 to-blue-600 flex items-center justify-center">
+            <div className="w-full h-full bg-gradient-to-br from-pink-500 via-purple-500 to-purple-600 flex items-center justify-center">
               <span className="text-sm font-black text-white">
                 {authorUsername.charAt(0).toUpperCase() || "?"}
               </span>
@@ -642,7 +642,7 @@ function ReelItem({ reel, currentUser }) {
                 ) : (
                   comments.map((c) => (
                     <div key={c.id} className="flex items-start gap-2 text-xs">
-                      <div className="w-7 h-7 rounded-full bg-gradient-to-br from-pink-500 via-purple-500 to-blue-600 flex items-center justify-center shrink-0">
+                      <div className="w-7 h-7 rounded-full bg-gradient-to-br from-pink-500 via-purple-500 to-purple-600 flex items-center justify-center shrink-0">
                         <span className="text-[10px] font-black text-white">
                           {c.username.charAt(0).toUpperCase()}
                         </span>
@@ -668,7 +668,7 @@ function ReelItem({ reel, currentUser }) {
                 />
                 <button
                   type="submit"
-                  className="bg-gradient-to-r from-pink-600 to-blue-600 hover:from-pink-500 hover:to-blue-500 px-5 py-2.5 rounded-xl text-white text-sm font-bold transition-all active:scale-95"
+                  className="bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 px-5 py-2.5 rounded-xl text-white text-sm font-bold transition-all active:scale-95"
                 >
                   Send
                 </button>

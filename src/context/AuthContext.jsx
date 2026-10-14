@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
-import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
+import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db } from "../firebase";
 import { generateEncryptionKey } from "../utils/crypto";
 
@@ -13,7 +13,6 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // 🔥 Failsafe: If Firebase doesn't respond in 1.5 seconds, stop loading anyway
     const failsafe = setTimeout(() => {
       console.log("Auth Failsafe triggered - forcing render");
       setLoading(false);
@@ -22,6 +21,7 @@ export const AuthProvider = ({ children }) => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       try {
         setCurrentUser(user);
+
         if (user) {
           const userRef = doc(db, "users", user.uid);
           const userSnap = await getDoc(userRef);
@@ -29,15 +29,20 @@ export const AuthProvider = ({ children }) => {
           if (!userSnap.exists()) {
             const newProfile = {
               email: user.email,
-              username: user.displayName || user.email.split('@')[0],
+              username: user.displayName || user.email.split("@")[0],
               photoURL: user.photoURL || "",
               bio: "New to the rebellion.",
+              followers: [],
+              following: [],
+              isPrivate: false,
               createdAt: serverTimestamp(),
             };
             await setDoc(userRef, newProfile);
             setUserProfile(newProfile);
           } else {
-            setUserProfile(userSnap.data());
+            const data = userSnap.data();
+            setUserProfile(data);
+            // 🔥 No auto-reactivate. User must click "Cancel Deletion" in the banner.
           }
 
           let storedKey = localStorage.getItem(`zuck_key_${user.uid}`);
@@ -54,7 +59,7 @@ export const AuthProvider = ({ children }) => {
         console.error("🔥 AuthContext Error:", error);
       } finally {
         clearTimeout(failsafe);
-        setLoading(false); // 🔥 Always unlocks the app
+        setLoading(false);
       }
     });
 

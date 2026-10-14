@@ -51,7 +51,7 @@ function ForgotPassword() {
       {/* 🔥 LEFT SIDE: Branding */}
       <div className="hidden lg:flex lg:w-1/2 relative z-10 flex-col justify-between p-14 border-r border-white/5">
         <Link to="/" className="flex items-center gap-4 w-fit group">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-pink-500 via-purple-500 to-blue-600 flex items-center justify-center shadow-[0_0_30px_-5px_rgba(236,72,153,0.6)] group-hover:shadow-[0_0_45px_-5px_rgba(236,72,153,0.9)] group-hover:scale-105 transition-all duration-300">
+          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-pink-500 via-purple-500 to-purple-600 flex items-center justify-center shadow-[0_0_30px_-5px_rgba(236,72,153,0.6)] group-hover:shadow-[0_0_45px_-5px_rgba(236,72,153,0.9)] group-hover:scale-105 transition-all duration-300">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" className="w-6 h-6 text-white">
             <path d="M7 20L14 4" />
             <path d="M13 20L20 4" />
@@ -59,7 +59,7 @@ function ForgotPassword() {
           </div>
           <div>
             <h1 className="text-2xl font-black text-white tracking-tighter leading-none">
-              ZUCK<span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-blue-500"> SLAYER</span>
+              ZUCK<span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-500"> SLAYER</span>
             </h1>
             <p className="text-[10px] text-gray-500 font-mono tracking-widest mt-1.5">EST. 2025 · v0.1.0 BETA</p>
           </div>
@@ -97,19 +97,19 @@ function ForgotPassword() {
         >
           {/* Mobile Logo */}
           <Link to="/" className="lg:hidden flex items-center justify-center gap-3 mb-8">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-pink-500 via-purple-500 to-blue-600 flex items-center justify-center shadow-[0_0_25px_-5px_rgba(236,72,153,0.6)]">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-pink-500 via-purple-500 to-purple-600 flex items-center justify-center shadow-[0_0_25px_-5px_rgba(236,72,153,0.6)]">
               <svg viewBox="0 0 24 24" fill="none" className="w-7 h-7 text-white" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z" />
               </svg>
             </div>
             <h1 className="text-2xl font-black text-white tracking-tighter">
-              ZUCK<span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-blue-500"> SLAYER</span>
+              ZUCK<span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-500"> SLAYER</span>
             </h1>
           </Link>
 
           {/* Card */}
           <div className="relative bg-[#111111]/80 backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-2xl overflow-hidden">
-            <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-pink-500/10 via-transparent to-blue-500/10 pointer-events-none" />
+            <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-pink-500/10 via-transparent to-purple-500/10 pointer-events-none" />
             
             <div className="relative z-10">
               <div className="mb-8">
@@ -171,7 +171,7 @@ function ForgotPassword() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-4 rounded-xl bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:via-purple-500 hover:to-blue-500 text-white font-bold tracking-wide shadow-[0_0_30px_-10px_rgba(236,72,153,0.6)] hover:shadow-[0_0_45px_-10px_rgba(236,72,153,0.9)] transition-all duration-300 transform hover:scale-[1.02] active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-2"
+                  className="w-full py-4 rounded-xl bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:via-purple-500 hover:to-purple-500 text-white font-bold tracking-wide shadow-[0_0_30px_-10px_rgba(236,72,153,0.6)] hover:shadow-[0_0_45px_-10px_rgba(236,72,153,0.9)] transition-all duration-300 transform hover:scale-[1.02] active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-2"
                 >
                   {loading ? (
                     <>

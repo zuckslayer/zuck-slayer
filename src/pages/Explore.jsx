@@ -41,6 +41,7 @@ function Explore() {
         const following = userProfile?.following || [];
         const suggestions = usersSnap.docs
           .map((d) => ({ id: d.id, ...d.data() }))
+          .filter((u) => !u.deactivated && !u.pendingDeletion)
           .filter((u) => u.id !== currentUser?.uid)
           .filter((u) => !following.includes(u.id))
           .sort((a, b) => (b.followers?.length || 0) - (a.followers?.length || 0))
@@ -83,7 +84,7 @@ function Explore() {
                 to={`/u/${u.username}`}
                 className="shrink-0 w-36 p-4 rounded-2xl bg-[#111111] border border-white/5 hover:border-pink-500/30 transition-all text-center group"
               >
-                <div className="w-16 h-16 rounded-2xl mx-auto mb-3 bg-gradient-to-br from-pink-500 via-purple-500 to-blue-600 flex items-center justify-center overflow-hidden">
+                <div className="w-16 h-16 rounded-2xl mx-auto mb-3 bg-gradient-to-br from-pink-500 via-purple-500 to-purple-600 flex items-center justify-center overflow-hidden">
                   {u.photoURL ? (
                     <img src={u.photoURL} alt="" className="w-full h-full object-cover" />
                   ) : (

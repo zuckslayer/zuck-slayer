@@ -75,7 +75,7 @@ function FollowList() {
             }
           })
         );
-        setUsers(userDocs.filter(Boolean));
+        setUsers(userDocs.filter(Boolean).filter((u) => !u.deactivated && !u.pendingDeletion));
 
         // 4. Fetch MY following list (so buttons render correctly)
         const meSnap = await getDoc(doc(db, "users", currentUser.uid));

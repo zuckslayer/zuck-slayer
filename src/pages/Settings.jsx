@@ -1,13 +1,11 @@
-// src/pages/Settings.jsx
 import { useState } from "react";
 import { auth, db } from "../firebase";
 import { signOut, sendPasswordResetEmail, deleteUser } from "firebase/auth";
-import { doc, updateDoc, deleteDoc } from "firebase/firestore";
+import { doc, updateDoc, deleteDoc, serverTimestamp } from "firebase/firestore";
 import { useAuth } from "../context/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useToast } from "../components/Toast";
-import UserActionsMenu from "../components/UserActionsMenu"; // (not needed here, but harmless)
 
 function Settings() {
   const { currentUser, userProfile } = useAuth();
@@ -16,10 +14,13 @@ function Settings() {
   const [loading, setLoading] = useState(false);
   const [isPrivate, setIsPrivate] = useState(userProfile?.isPrivate || false);
 
+  // ─────────────────────────────────────
+  // PRIVACY TOGGLE
+  // ─────────────────────────────────────
   const handlePrivacyToggle = async () => {
     setLoading(true);
     const newValue = !isPrivate;
-    setIsPrivate(newValue); // Optimistic
+    setIsPrivate(newValue);
     try {
       await updateDoc(doc(db, "users", currentUser.uid), {
         isPrivate: newValue,
@@ -32,13 +33,16 @@ function Settings() {
       );
     } catch (err) {
       console.error(err);
-      setIsPrivate(!newValue); // Revert
+      setIsPrivate(!newValue);
       showToast("Failed to update privacy. Try again.", "error");
     } finally {
       setLoading(false);
     }
   };
 
+  // ─────────────────────────────────────
+  // PASSWORD RESET
+  // ─────────────────────────────────────
   const handlePasswordReset = async () => {
     setLoading(true);
     try {
@@ -51,41 +55,90 @@ function Settings() {
     }
   };
 
+  // ─────────────────────────────────────
+  // LOGOUT
+  // ─────────────────────────────────────
   const handleLogout = async () => {
     await signOut(auth);
     showToast("Logged out. See you soon.", "info");
     navigate("/login");
   };
 
+  // ─────────────────────────────────────
+  // DEACTIVATE (quick hide, reactivate on login)
+  // ─────────────────────────────────────
+  const handleDeactivate = async () => {
+    if (
+      !window.confirm(
+        "Deactivate your account?\n\nYour profile will be hidden. Log back in anytime to reactivate."
+      )
+    )
+      return;
+
+    setLoading(true);
+    try {
+      await updateDoc(doc(db, "users", currentUser.uid), {
+        deactivated: true,
+        deactivatedAtMs: Date.now(),
+      });
+      await signOut(auth);
+      showToast("Account deactivated. Log in anytime to reactivate.", "success");
+      navigate("/login");
+    } catch (err) {
+      console.error(err);
+      showToast("Failed to deactivate. Try again.", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ─────────────────────────────────────
+  // DELETE (30-day grace period)
+  // ─────────────────────────────────────
   const handleDeleteAccount = async () => {
-    const confirm1 = window.confirm(
-      "Are you sure? This will permanently delete your account and all your data."
+    const confirmed = window.confirm(
+      "Schedule your account for deletion?\n\n" +
+        "• Your profile will be hidden from everyone\n" +
+        "• You have 30 days to change your mind\n" +
+        "• After 30 days, everything is permanently deleted\n\n" +
+        "Continue?"
     );
-    if (!confirm1) return;
-    const confirm2 = window.prompt("Type DELETE in all caps to confirm:");
-    if (confirm2 !== "DELETE") {
+    if (!confirmed) return;
+
+    const finalConfirm = window.prompt('Type "DELETE" (all caps) to confirm:');
+    if (finalConfirm !== "DELETE") {
       showToast("Deletion cancelled.", "info");
       return;
     }
 
     setLoading(true);
     try {
-      if (userProfile) {
-        await deleteDoc(doc(db, "users", currentUser.uid));
-      }
-      await deleteUser(currentUser);
-      navigate("/signup");
+      const now = Date.now();
+      const purgeAtMs = now + 30 * 24 * 60 * 60 * 1000;
+
+      await updateDoc(doc(db, "users", currentUser.uid), {
+        pendingDeletion: true,
+        deletionRequestedAtMs: now,
+        purgeAtMs,
+      });
+
+      showToast(
+        "Account scheduled for deletion. Log back in within 30 days to cancel.",
+        "success"
+      );
+      await signOut(auth);
+      navigate("/login");
     } catch (err) {
-      if (err.code === "auth/requires-recent-login") {
-        showToast("Please log out and log back in before deleting.", "error");
-      } else {
-        showToast(err.message, "error");
-      }
+      console.error("Deletion request failed:", err);
+      showToast("Failed to schedule deletion. Try again.", "error");
     } finally {
       setLoading(false);
     }
   };
 
+  // ─────────────────────────────────────
+  // REUSABLE ROW
+  // ─────────────────────────────────────
   const SettingsRow = ({ icon, title, description, onClick, danger, rightElement }) => (
     <button
       onClick={onClick}
@@ -105,7 +158,9 @@ function Settings() {
           {icon}
         </div>
         <div>
-          <p className={`font-semibold text-sm ${danger ? "text-red-400" : "text-white"}`}>{title}</p>
+          <p className={`font-semibold text-sm ${danger ? "text-red-400" : "text-white"}`}>
+            {title}
+          </p>
           <p className="text-xs text-gray-500 mt-0.5">{description}</p>
         </div>
       </div>
@@ -134,7 +189,7 @@ function Settings() {
         </Link>
         <h1 className="text-4xl font-black tracking-tighter">
           Account{" "}
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-blue-500">
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-500">
             Settings
           </span>
         </h1>
@@ -147,23 +202,26 @@ function Settings() {
         transition={{ duration: 0.5 }}
         className="space-y-4"
       >
-        {/* Account Info */}
+        {/* Signed in as */}
         <div className="bg-[#111111]/80 backdrop-blur-xl border border-white/10 rounded-3xl p-6 mb-6">
-          <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">Signed in as</p>
+          <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">
+            Signed in as
+          </p>
           <p className="text-sm text-pink-400 font-mono truncate">{currentUser?.email}</p>
         </div>
 
         {/* Privacy */}
         <div>
-          <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-3 px-2">Privacy</p>
+          <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-3 px-2">
+            Privacy
+          </p>
           <div className="space-y-2">
-            {/* Private Account Toggle */}
             <button
               onClick={handlePrivacyToggle}
               disabled={loading}
               className={`w-full flex items-center justify-between p-4 rounded-2xl border transition-all duration-300 text-left ${
                 isPrivate
-                  ? "bg-gradient-to-r from-pink-500/10 to-blue-500/5 border-pink-500/30"
+                  ? "bg-gradient-to-r from-pink-500/10 to-purple-500/5 border-pink-500/30"
                   : "bg-white/[0.02] border-white/5 hover:border-pink-500/30 hover:bg-white/[0.04]"
               }`}
             >
@@ -195,7 +253,6 @@ function Settings() {
                 </div>
               </div>
 
-              {/* Toggle Switch */}
               <div
                 className={`relative w-12 h-7 rounded-full transition-colors duration-300 ${
                   isPrivate ? "bg-pink-500" : "bg-white/10"
@@ -213,18 +270,20 @@ function Settings() {
 
         {/* Security */}
         <div>
-          <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-3 px-2 mt-6">Security</p>
+          <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-3 px-2 mt-6">
+            Security
+          </p>
           <div className="space-y-2">
             <SettingsRow
               icon={
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5">
-          <circle cx="12" cy="12" r="10" />
-          <path d="M4.93 4.93l14.14 14.14" strokeLinecap="round" />
-          </svg>
-          }
-          title="Blocked Accounts"
-          description="Manage who can't see or message you"
-          onClick={() => navigate("/blocked")}
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5">
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="M4.93 4.93l14.14 14.14" strokeLinecap="round" />
+                </svg>
+              }
+              title="Blocked Accounts"
+              description="Manage who can't see or message you"
+              onClick={() => navigate("/blocked")}
             />
             <SettingsRow
               icon={
@@ -241,7 +300,9 @@ function Settings() {
 
         {/* Account */}
         <div>
-          <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-3 px-2 mt-6">Account</p>
+          <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-3 px-2 mt-6">
+            Account
+          </p>
           <div className="space-y-2">
             <SettingsRow
               icon={
@@ -256,11 +317,21 @@ function Settings() {
             <SettingsRow
               icon={
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5">
+                  <path d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              }
+              title="Deactivate Account"
+              description="Hide your profile. Log back in anytime."
+              onClick={handleDeactivate}
+            />
+            <SettingsRow
+              icon={
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5">
                   <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               }
               title="Delete Account"
-              description="Permanently delete your account and data"
+              description="Schedule deletion. 30 days to change your mind."
               onClick={handleDeleteAccount}
               danger
             />
